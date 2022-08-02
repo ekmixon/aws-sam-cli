@@ -96,7 +96,7 @@ class PackageContext:
         """
         Execute packaging based on the argument provided by customers and samconfig.toml.
         """
-        region_name = self.region if self.region else None
+        region_name = self.region or None
 
         s3_client = boto3.client(
             "s3",
@@ -136,12 +136,11 @@ class PackageContext:
         template = Template(template_path, os.getcwd(), self.uploaders, self.code_signer)
         exported_template = template.export()
 
-        if use_json:
-            exported_str = json.dumps(exported_template, indent=4, ensure_ascii=False)
-        else:
-            exported_str = yaml_dump(exported_template)
-
-        return exported_str
+        return (
+            json.dumps(exported_template, indent=4, ensure_ascii=False)
+            if use_json
+            else yaml_dump(exported_template)
+        )
 
     @staticmethod
     def write_output(output_file_name: Optional[str], data: str) -> None:

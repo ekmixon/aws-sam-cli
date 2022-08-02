@@ -136,4 +136,6 @@ class TestLambdaUri(TestCase):
     def test_get_function_name_failure(self, test_case_name, uri):
 
         result = LambdaUri.get_function_name(uri)
-        self.assertIsNone(result, "Must fail to get function name when " + test_case_name)
+        self.assertIsNone(
+            result, f"Must fail to get function name when {test_case_name}"
+        )

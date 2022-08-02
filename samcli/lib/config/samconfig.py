@@ -120,8 +120,7 @@ class SamConfig:
         cmd_name_key = self._to_key(cmd_names)
         env_content = self.document.get(env, {})
         cmd_content = env_content.get(cmd_name_key, {})
-        param_content = cmd_content.get(section, {})
-        if param_content:
+        if param_content := cmd_content.get(section, {}):
             param_content.update({key: value})
         elif cmd_content:
             cmd_content.update({section: {key: value}})
@@ -196,7 +195,7 @@ class SamConfig:
 
         self._ensure_exists()
 
-        current_version = self._version() if self._version() else SAM_CONFIG_VERSION
+        current_version = self._version() or SAM_CONFIG_VERSION
         try:
             self.document.add(VERSION_KEY, current_version)
         except tomlkit.exceptions.KeyAlreadyPresent:

@@ -49,9 +49,10 @@ class PackageIntegBase(TestCase):
         else:
             cls.pre_created_ecr_repo = False
         cls.ecr_repo_name = (
-            cls.pre_created_ecr_repo if cls.pre_created_ecr_repo else str(uuid.uuid4()).replace("-", "")[:10]
+            cls.pre_created_ecr_repo or str(uuid.uuid4()).replace("-", "")[:10]
         )
-        cls.bucket_name = cls.pre_created_bucket if cls.pre_created_bucket else str(uuid.uuid4())
+
+        cls.bucket_name = cls.pre_created_bucket or str(uuid.uuid4())
         cls.test_data_path = Path(__file__).resolve().parents[1].joinpath("testdata", "package")
 
         # Intialize S3 client
@@ -76,11 +77,7 @@ class PackageIntegBase(TestCase):
         super().tearDown()
 
     def base_command(self):
-        command = "sam"
-        if os.getenv("SAM_CLI_DEV"):
-            command = "samdev"
-
-        return command
+        return "samdev" if os.getenv("SAM_CLI_DEV") else "sam"
 
     def get_command_list(
         self,
@@ -101,31 +98,31 @@ class PackageIntegBase(TestCase):
         command_list = [self.base_command(), "package"]
 
         if s3_bucket:
-            command_list = command_list + ["--s3-bucket", str(s3_bucket)]
+            command_list += ["--s3-bucket", str(s3_bucket)]
         if template:
-            command_list = command_list + ["--template", str(template)]
+            command_list += ["--template", str(template)]
         if template_file:
-            command_list = command_list + ["--template-file", str(template_file)]
+            command_list += ["--template-file", str(template_file)]
 
         if s3_prefix:
-            command_list = command_list + ["--s3-prefix", str(s3_prefix)]
+            command_list += ["--s3-prefix", str(s3_prefix)]
 
         if output_template_file:
-            command_list = command_list + ["--output-template-file", str(output_template_file)]
+            command_list += ["--output-template-file", str(output_template_file)]
         if kms_key_id:
-            command_list = command_list + ["--kms-key-id", str(kms_key_id)]
+            command_list += ["--kms-key-id", str(kms_key_id)]
         if use_json:
-            command_list = command_list + ["--use-json"]
+            command_list += ["--use-json"]
         if force_upload:
-            command_list = command_list + ["--force-upload"]
+            command_list += ["--force-upload"]
         if no_progressbar:
-            command_list = command_list + ["--no-progressbar"]
+            command_list += ["--no-progressbar"]
         if metadata:
-            command_list = command_list + ["--metadata", json.dumps(metadata)]
+            command_list += ["--metadata", json.dumps(metadata)]
         if image_repository:
-            command_list = command_list + ["--image-repository", str(image_repository)]
+            command_list += ["--image-repository", str(image_repository)]
         if image_repositories:
-            command_list = command_list + ["--image-repositories", str(image_repositories)]
+            command_list += ["--image-repositories", str(image_repositories)]
         if resolve_s3:
-            command_list = command_list + ["--resolve-s3"]
+            command_list += ["--resolve-s3"]
         return command_list

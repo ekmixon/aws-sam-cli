@@ -21,7 +21,7 @@ from botocore.exceptions import ClientError
 SKIP_BOOTSTRAP_TESTS = RUNNING_ON_CI and RUNNING_TEST_FOR_MASTER_ON_CI and not RUN_BY_CANARY
 
 # In order to run bootstrap integration test locally make sure your test account is configured as `default` account.
-CREDENTIAL_PROFILE = "2" if not RUN_BY_CANARY else "1"
+CREDENTIAL_PROFILE = "1" if RUN_BY_CANARY else "2"
 
 CFN_OUTPUT_TO_CONFIG_KEY = {
     "ArtifactsBucket": "artifacts_bucket",
@@ -54,9 +54,7 @@ class TestBootstrap(BootstrapIntegBase):
         if create_image_repository:
             inputs.append("")  # Create image repository
 
-        inputs.append("")  # Confirm summary
-        inputs.append("y")  # Create resources
-
+        inputs.extend(("", "y"))
         bootstrap_process_execute = run_command_with_inputs(bootstrap_command_list, inputs)
 
         self.assertEqual(bootstrap_process_execute.process.returncode, 0)
@@ -163,9 +161,9 @@ class TestBootstrap(BootstrapIntegBase):
         stacks = response["Stacks"]
         self.assertTrue(len(stacks) > 0)  # in case stack name is invalid
         stack_outputs = stacks[0]["Outputs"]
-        output_values = {}
-        for value in stack_outputs:
-            output_values[value["OutputKey"]] = value["OutputValue"]
+        output_values = {
+            value["OutputKey"]: value["OutputValue"] for value in stack_outputs
+        }
 
         # Get values saved in config file
         config = SamConfig(PIPELINE_CONFIG_DIR, PIPELINE_CONFIG_FILENAME)

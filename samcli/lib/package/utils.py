@@ -180,9 +180,7 @@ def upload_local_artifacts(
 
 def resource_not_packageable(resource_dict):
     inline_code = jmespath.search("InlineCode", resource_dict)
-    if inline_code is not None:
-        return True
-    return False
+    return inline_code is not None
 
 
 def zip_and_upload(local_path: str, uploader: S3Uploader, extension: Optional[str]) -> str:
@@ -209,7 +207,7 @@ def zip_folder(folder_path):
         The md5 hash of the directory
     """
     md5hash = dir_checksum(folder_path, followlinks=True)
-    filename = os.path.join(tempfile.gettempdir(), "data-" + md5hash)
+    filename = os.path.join(tempfile.gettempdir(), f"data-{md5hash}")
 
     zipfile_name = make_zip(filename, folder_path)
     try:

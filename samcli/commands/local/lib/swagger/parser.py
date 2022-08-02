@@ -164,7 +164,4 @@ class SwaggerParser:
             Payload format version, if exists. None, if not.
         """
         integration = self._get_integration(method_config)
-        if integration is None:
-            return None
-
-        return integration.get("payloadFormatVersion")
+        return None if integration is None else integration.get("payloadFormatVersion")

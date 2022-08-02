@@ -59,10 +59,15 @@ class SamLayerProvider(SamBaseProvider):
         if not name:
             raise ValueError("Layer name is required")
 
-        for layer in self._layers:
-            if posixpath.join(layer.stack_path, layer.name) == name or layer.name == name:
-                return layer
-        return None
+        return next(
+            (
+                layer
+                for layer in self._layers
+                if posixpath.join(layer.stack_path, layer.name) == name
+                or layer.name == name
+            ),
+            None,
+        )
 
     def get_all(self) -> List[LayerVersion]:
         """

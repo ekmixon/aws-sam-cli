@@ -50,11 +50,7 @@ class BuildIntegBase(TestCase):
 
     @classmethod
     def base_command(cls):
-        command = "sam"
-        if os.getenv("SAM_CLI_DEV"):
-            command = "samdev"
-
-        return command
+        return "samdev" if os.getenv("SAM_CLI_DEV") else "sam"
 
     def get_command_list(
         self,
@@ -147,7 +143,12 @@ class BuildIntegBase(TestCase):
         self.assertEqual(f"public.ecr.aws/sam/build-{runtime}:latest", images[0].tags[0])
 
     def _make_parameter_override_arg(self, overrides):
-        return " ".join(["ParameterKey={},ParameterValue={}".format(key, value) for key, value in overrides.items()])
+        return " ".join(
+            [
+                f"ParameterKey={key},ParameterValue={value}"
+                for key, value in overrides.items()
+            ]
+        )
 
     def _verify_resource_property(self, template_path, logical_id, property, expected_value):
 
@@ -158,7 +159,7 @@ class BuildIntegBase(TestCase):
             )
 
     def _verify_invoke_built_function(self, template_path, function_logical_id, overrides, expected_result):
-        LOG.info("Invoking built function '{}'".format(function_logical_id))
+        LOG.info(f"Invoking built function '{function_logical_id}'")
 
         cmdlist = [
             self.cmd,
@@ -259,7 +260,9 @@ class BuildIntegRubyBase(BuildIntegBase):
 
         gem_path = ruby_bundled_path.joinpath(ruby_version[0], "gems")
 
-        self.assertTrue(any([True if self.EXPECTED_RUBY_GEM in gem else False for gem in os.listdir(str(gem_path))]))
+        self.assertTrue(
+            any(self.EXPECTED_RUBY_GEM in gem for gem in os.listdir(str(gem_path)))
+        )
 
 
 class DedupBuildIntegBase(BuildIntegBase):
@@ -379,7 +382,7 @@ class IntrinsicIntegBase(BuildIntegBase):
         Invoke the function, if error_message is not None, the invoke should fail.
         """
         for function_logical_id in functions:
-            LOG.info("Invoking built function '{}'".format(function_logical_id))
+            LOG.info(f"Invoking built function '{function_logical_id}'")
 
             cmdlist = [
                 self.cmd,

@@ -124,13 +124,16 @@ def get_selector(
     """
 
     # Create a combined view of all the selectors
-    all_selectors: Dict[str, WorkFlowSelector] = dict()
+    all_selectors: Dict[str, WorkFlowSelector] = {}
     for selector in selector_list:
         all_selectors = {**all_selectors, **selector}
 
     # Check for specified workflow being supported at all and if it's not, raise an UnsupportedBuilderException.
     if specified_workflow and specified_workflow not in all_selectors:
-        raise UnsupportedBuilderException("'{}' does not have a supported builder".format(specified_workflow))
+        raise UnsupportedBuilderException(
+            f"'{specified_workflow}' does not have a supported builder"
+        )
+
 
     # Loop through all identifiers to gather list of selectors with potential matches.
     selectors = [all_selectors.get(identifier) for identifier in identifiers if identifier]
@@ -167,7 +170,10 @@ def get_layer_subfolder(build_workflow: str) -> str:
     }
 
     if build_workflow not in subfolders_by_runtime:
-        raise UnsupportedRuntimeException("'{}' runtime is not supported for layers".format(build_workflow))
+        raise UnsupportedRuntimeException(
+            f"'{build_workflow}' runtime is not supported for layers"
+        )
+
 
     return subfolders_by_runtime[build_workflow]
 
@@ -251,7 +257,7 @@ def get_workflow_config(
     # If runtime is present it should be in selectors_by_runtime, however for layers there will be no runtime
     # so in that case we move ahead and resolve to any matching workflow from both types.
     if runtime and runtime not in selectors_by_runtime:
-        raise UnsupportedRuntimeException("'{}' runtime is not supported".format(runtime))
+        raise UnsupportedRuntimeException(f"'{runtime}' runtime is not supported")
 
     try:
         # Identify appropriate workflow selector.
@@ -261,15 +267,10 @@ def get_workflow_config(
             specified_workflow=specified_workflow,
         )
 
-        # pylint: disable=fixme
-        # FIXME: selector could be None here, we should raise an exception if it is None.
-
-        # Identify workflow configuration from the workflow selector.
-        config = cast(WorkFlowSelector, selector).get_config(code_dir, project_dir)
-        return config
+        return cast(WorkFlowSelector, selector).get_config(code_dir, project_dir)
     except ValueError as ex:
         raise UnsupportedRuntimeException(
-            "Unable to find a supported build workflow for runtime '{}'. Reason: {}".format(runtime, str(ex))
+            f"Unable to find a supported build workflow for runtime '{runtime}'. Reason: {str(ex)}"
         ) from ex
 
 
@@ -358,13 +359,13 @@ class ManifestWorkflowSelector(BasicWorkflowSelector):
 
         for config in self.configs:
 
-            if any([self._has_manifest(config, directory) for directory in search_dirs]):
+            if any(
+                self._has_manifest(config, directory) for directory in search_dirs
+            ):
                 return config
 
         raise ValueError(
-            "None of the supported manifests '{}' were found in the following paths '{}'".format(
-                [config.manifest_name for config in self.configs], search_dirs
-            )
+            f"None of the supported manifests '{[config.manifest_name for config in self.configs]}' were found in the following paths '{search_dirs}'"
         )
 
     @staticmethod

@@ -44,8 +44,7 @@ class SchemasApiCaller:
             )
             page = None
             for page in page_iterator:
-                for registry in page["Registries"]:
-                    registries.append(registry["RegistryName"])
+                registries.extend(registry["RegistryName"] for registry in page["Registries"])
             if not registries:
                 raise ResourceNotFound("No Registries found. This should not be possible, please raise an issue.")
             next_token = page.get("NextToken", None)
@@ -79,10 +78,9 @@ class SchemasApiCaller:
             )
             page = None
             for page in page_iterator:
-                for schema in page["Schemas"]:
-                    schemas.append(schema["SchemaName"])
+                schemas.extend(schema["SchemaName"] for schema in page["Schemas"])
             if not schemas:
-                raise ResourceNotFound("No Schemas found for registry %s" % registry_name)
+                raise ResourceNotFound(f"No Schemas found for registry {registry_name}")
             next_token = page.get("NextToken", None)
             return {"schemas": schemas, "next_token": next_token}
         except EndpointConnectionError as ex:
@@ -113,9 +111,7 @@ class SchemasApiCaller:
                 )
                 page = None
                 for page in page_iterator:
-                    for version in page["SchemaVersions"]:
-                        versions.append(version["SchemaVersion"])
-
+                    versions.extend(version["SchemaVersion"] for version in page["SchemaVersions"])
                 next_token = page.get("NextToken")
                 if next_token is None:
                     break

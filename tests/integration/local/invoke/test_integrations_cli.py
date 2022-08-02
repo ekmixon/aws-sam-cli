@@ -644,9 +644,9 @@ class TestUsingConfigFiles(InvokeIntegBase):
 
     def _create_config_file(self, profile):
         if profile == "default":
-            config_file_content = "[{}]\noutput = json\nregion = us-west-1".format(profile)
+            config_file_content = f"[{profile}]\noutput = json\nregion = us-west-1"
         else:
-            config_file_content = "[profile {}]\noutput = json\nregion = us-west-1".format(profile)
+            config_file_content = f"[profile {profile}]\noutput = json\nregion = us-west-1"
 
         custom_config = os.path.join(self.config_dir, "customconfig")
         with open(custom_config, "w") as file:
@@ -941,7 +941,7 @@ class TestLayerVersionThatDoNotCreateCache(InvokeIntegBase):
         process_stderr = stderr.strip()
         error_output = process_stderr.decode("utf-8")
 
-        expected_error_output = "{} was not found.".format(non_existent_layer_arn)
+        expected_error_output = f"{non_existent_layer_arn} was not found."
 
         self.assertIn(expected_error_output, error_output)
         self.layer_utils.delete_layers()

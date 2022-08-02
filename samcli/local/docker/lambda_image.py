@@ -141,7 +141,13 @@ class LambdaImage:
             stream_writer = stream or StreamWriter(sys.stderr)
             stream_writer.write("Building image...")
             stream_writer.flush()
-            self._build_image(image if image else image_name, image_tag, downloaded_layers, stream=stream_writer)
+            self._build_image(
+                image or image_name,
+                image_tag,
+                downloaded_layers,
+                stream=stream_writer,
+            )
+
 
         return image_tag
 
@@ -178,7 +184,10 @@ class LambdaImage:
         # functions that are defined. If two functions use the same runtime with the same layers (in the
         # same order), SAM CLI will only produce one image and use this image across both functions for invoke.
         return (
-            runtime + "-" + hashlib.sha256("-".join([layer.name for layer in layers]).encode("utf-8")).hexdigest()[0:25]
+            f"{runtime}-"
+            + hashlib.sha256(
+                "-".join([layer.name for layer in layers]).encode("utf-8")
+            ).hexdigest()[:25]
         )
 
     def _build_image(self, base_image, docker_tag, layers, stream=None):
@@ -202,7 +211,7 @@ class LambdaImage:
         dockerfile_content = self._generate_dockerfile(base_image, layers)
 
         # Create dockerfile in the same directory of the layer cache
-        dockerfile_name = "dockerfile_" + str(uuid.uuid4())
+        dockerfile_name = f"dockerfile_{str(uuid.uuid4())}"
         full_dockerfile_path = Path(self.layer_downloader.layer_cache, dockerfile_name)
         stream_writer = stream or StreamWriter(sys.stderr)
 
@@ -214,7 +223,7 @@ class LambdaImage:
             tar_paths = {str(full_dockerfile_path): "Dockerfile", self._RAPID_SOURCE_PATH: "/aws-lambda-rie"}
 
             for layer in layers:
-                tar_paths[layer.codeuri] = "/" + layer.name
+                tar_paths[layer.codeuri] = f"/{layer.name}"
 
             # Set permission for all the files in the tarball to 500(Read and Execute Only)
             # This is need for systems without unix like permission bits(Windows) while creating a unix image
@@ -285,5 +294,8 @@ class LambdaImage:
         )
 
         for layer in layers:
-            dockerfile_content = dockerfile_content + f"ADD {layer.name} {LambdaImage._LAYERS_DIR}\n"
+            dockerfile_content = (
+                f"{dockerfile_content}ADD {layer.name} {LambdaImage._LAYERS_DIR}\n"
+            )
+
         return dockerfile_content

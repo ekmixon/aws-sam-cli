@@ -187,10 +187,7 @@ class BuildContext:
 
     @property
     def manifest_path_override(self) -> Optional[str]:
-        if self._manifest_path:
-            return os.path.abspath(self._manifest_path)
-
-        return None
+        return os.path.abspath(self._manifest_path) if self._manifest_path else None
 
     @property
     def mode(self) -> Optional[str]:
@@ -270,7 +267,7 @@ class BuildContext:
         if not layer:
             # No layer found
             return
-        if layer and layer.build_method is None:
+        if layer.build_method is None:
             LOG.error("Layer %s is missing BuildMethod Metadata.", self._function_provider)
             raise MissingBuildMethodException(f"Build method missing in layer {resource_identifier}.")
 

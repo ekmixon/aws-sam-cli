@@ -49,7 +49,8 @@ class TestPublishExistingApp(PublishAppIntegBase):
         command_list = self.get_command_list(template_path=template_path, region=self.region_name)
 
         result = run_command(command_list)
-        expected_msg = 'The following metadata of application "{}" has been updated:'.format(self.application_id)
+        expected_msg = f'The following metadata of application "{self.application_id}" has been updated:'
+
         result_msg = result.stdout.decode("utf-8")
         self.assertIn(expected_msg, result_msg)
 
@@ -63,7 +64,8 @@ class TestPublishExistingApp(PublishAppIntegBase):
             template_path=template_path, region=self.region_name, semantic_version="0.1.0"
         )
         result = run_command(command_list)
-        expected_msg = 'The following metadata of application "{}" has been updated:'.format(self.application_id)
+        expected_msg = f'The following metadata of application "{self.application_id}" has been updated:'
+
         self.assertIn(expected_msg, result.stdout.decode("utf-8"))
 
         app_metadata_text = self.temp_dir.joinpath("metadata_create_app_version.json").read_text()

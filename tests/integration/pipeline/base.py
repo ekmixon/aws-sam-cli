@@ -16,11 +16,7 @@ from samcli.lib.pipeline.bootstrap.stage import Stage
 
 class PipelineBase(TestCase):
     def base_command(self):
-        command = "sam"
-        if os.getenv("SAM_CLI_DEV"):
-            command = "samdev"
-
-        return command
+        return "samdev" if os.getenv("SAM_CLI_DEV") else "sam"
 
 
 class InitIntegBase(PipelineBase):

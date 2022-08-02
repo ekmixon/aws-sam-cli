@@ -91,9 +91,7 @@ class Route:
         :return list: Either the input http_method or one of the _ANY_HTTP_METHODS (normalized Http Methods)
         """
         methods = [method.upper() for method in methods]
-        if "ANY" in methods:
-            return self.ANY_HTTP_METHODS
-        return methods
+        return self.ANY_HTTP_METHODS if "ANY" in methods else methods
 
 
 class CatchAllPathConverter(BaseConverter):
@@ -238,13 +236,11 @@ class LocalApigwService(BaseLocalService):
 
     @staticmethod
     def _v2_route_key(method, path, is_default_route):
-        if is_default_route:
-            return "$default"
-        return "{} {}".format(method, path)
+        return "$default" if is_default_route else f"{method} {path}"
 
     @staticmethod
     def _route_key(method, path):
-        return "{}:{}".format(path, method)
+        return f"{path}:{method}"
 
     def _construct_error_handling(self):
         """
@@ -550,8 +546,7 @@ class LocalApigwService(BaseLocalService):
         allowable = {"statusCode", "body", "headers", "multiValueHeaders", "isBase64Encoded", "cookies"}
         if event_type == Route.API:
             allowable.add("base64Encoded")
-        invalid_keys = output.keys() - allowable
-        return invalid_keys
+        return output.keys() - allowable
 
     @staticmethod
     def _should_base64_decode_body(binary_types, flask_request, lamba_response_headers, is_base_64_encoded):
@@ -825,10 +820,10 @@ class LocalApigwService(BaseLocalService):
             Returns a list of cookies
 
         """
-        cookies = []
-        for cookie_key in flask_request.cookies.keys():
-            cookies.append("{}={}".format(cookie_key, flask_request.cookies.get(cookie_key)))
-        return cookies
+        return [
+            f"{cookie_key}={flask_request.cookies.get(cookie_key)}"
+            for cookie_key in flask_request.cookies.keys()
+        ]
 
     @staticmethod
     def _event_http_headers(flask_request, port):
@@ -847,11 +842,10 @@ class LocalApigwService(BaseLocalService):
             Returns a list of cookies
 
         """
-        headers = {}
-        # Multi-value request headers is not really supported by Flask.
-        # See https://github.com/pallets/flask/issues/850
-        for header_key in flask_request.headers.keys():
-            headers[header_key] = flask_request.headers.get(header_key)
+        headers = {
+            header_key: flask_request.headers.get(header_key)
+            for header_key in flask_request.headers.keys()
+        }
 
         headers["X-Forwarded-Proto"] = flask_request.scheme
         headers["X-Forwarded-Port"] = str(port)

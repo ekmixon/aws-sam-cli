@@ -25,8 +25,7 @@ class SamCliLogger:
         formatter logging.formatter
             Formatter for the logger
         """
-        handlers = logger.handlers
-        if handlers:
+        if handlers := logger.handlers:
             log_stream_handler = handlers[0]
         else:
             log_stream_handler = logging.StreamHandler()

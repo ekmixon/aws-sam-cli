@@ -12,14 +12,14 @@ POTENTIAL_PACKAGE_SEPARATOR = "[@]"
 def get_package_hierarchy(schema_name):
     path = "schema"
     if schema_name.startswith("aws.partner-"):
-        path = path + "." "aws.partner"
+        path += "." "aws.partner"
         tail = schema_name[len("aws.partner-") :]
-        path = path + "." + sanitize_name(tail)
+        path = f"{path}.{sanitize_name(tail)}"
         return path.lower()
     if schema_name.startswith("aws."):
         parts = schema_name.split(".")
         for part in parts:
-            path = path + "."
+            path = f"{path}."
             path = path + sanitize_name(part)
         return path.lower()
     return f"{path}.{sanitize_name(schema_name)}".lower()

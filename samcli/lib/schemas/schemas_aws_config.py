@@ -47,7 +47,7 @@ def _get_aws_profile_choice(available_profiles):
     click.echo("\nWhich AWS profile do you want to use?")
 
     for profile in available_profiles:
-        msg = str(profile_choice_num) + " - " + profile
+        msg = f"{str(profile_choice_num)} - {profile}"
         click.echo("\t" + msg)
         profile_choice_num = profile_choice_num + 1
 
@@ -60,29 +60,28 @@ def _get_aws_region_choice(available_regions_name, region):
         raise ResourceNotFound(
             "No AWS region found for AWS schemas service. This should not be possible, please raise an issue."
         )
-    cli_display_regions = dict()
+    cli_display_regions = {}
 
     for available_region_name in available_regions_name:
         region_prefix = available_region_name.rsplit("-", 1)[0]
         if region_prefix not in cli_display_regions:
             cli_display_regions[region_prefix] = available_region_name
         else:
-            cli_display_regions[region_prefix] = cli_display_regions.get(region_prefix) + "," + available_region_name
+            cli_display_regions[
+                region_prefix
+            ] = f"{cli_display_regions.get(region_prefix)},{available_region_name}"
+
 
     click.echo("\nWhich region do you want to use for your schema registry?")
     click.echo("# Partial list of AWS regions")
     click.echo("#")
 
     for msg in cli_display_regions.values():
-        click.echo("# " + msg)
+        click.echo(f"# {msg}")
 
-    region_choice = click.prompt(f"Region [{region}]", type=str, show_choices=False)
-    return region_choice
+    return click.prompt(f"Region [{region}]", type=str, show_choices=False)
 
 
 def get_schemas_client(profile, region):
-    if profile:
-        session = Session(profile_name=profile)
-    else:
-        session = Session()
+    session = Session(profile_name=profile) if profile else Session()
     return session.client("schemas", region_name=region)

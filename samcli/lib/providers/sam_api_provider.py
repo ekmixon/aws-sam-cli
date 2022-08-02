@@ -238,9 +238,9 @@ class SamApiProvider(CfnBaseApiProvider):
         if isinstance(api_resource_id, dict):
             LOG.debug("Invalid RestApiId property of event %s", event_properties)
             raise InvalidSamDocumentException(
-                "RestApiId property of resource with logicalId '{}' is invalid. "
-                "It should either be a LogicalId string or a Ref of a Logical Id string".format(lambda_logical_id)
+                f"RestApiId property of resource with logicalId '{lambda_logical_id}' is invalid. It should either be a LogicalId string or a Ref of a Logical Id string"
             )
+
 
         return (
             api_resource_id,
@@ -326,6 +326,4 @@ class SamApiProvider(CfnBaseApiProvider):
             "A/B/C" (3-level nested stack), depth = 3
         """
 
-        if not route.stack_path:
-            return 0
-        return route.stack_path.count("/") + 1
+        return route.stack_path.count("/") + 1 if route.stack_path else 0

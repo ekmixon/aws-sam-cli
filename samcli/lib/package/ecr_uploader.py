@@ -27,7 +27,7 @@ class ECRUploader:
     """
 
     def __init__(self, docker_client, ecr_client, ecr_repo, ecr_repo_multi, tag="latest", stream=stderr()):
-        self.docker_client = docker_client if docker_client else docker.from_env()
+        self.docker_client = docker_client or docker.from_env()
         self.ecr_client = ecr_client
         self.ecr_repo = ecr_repo
         self.ecr_repo_multi = ecr_repo_multi
@@ -69,8 +69,11 @@ class ECRUploader:
 
             _tag = tag_translation(image, docker_image_id=docker_img.id, gen_tag=self.tag)
             repository = (
-                self.ecr_repo if not isinstance(self.ecr_repo_multi, dict) else self.ecr_repo_multi.get(resource_name)
+                self.ecr_repo_multi.get(resource_name)
+                if isinstance(self.ecr_repo_multi, dict)
+                else self.ecr_repo
             )
+
 
             docker_img.tag(repository=repository, tag=_tag)
             push_logs = self.docker_client.api.push(
@@ -89,7 +92,7 @@ class ECRUploader:
         Stream progress from docker push logs and move the cursor based on the log id.
         :param logs: generator from docker_clent.api.push
         """
-        ids = dict()
+        ids = {}
         for log in logs:
             _id = log.get("id", None)
             status = log.get("status", None)
@@ -104,7 +107,7 @@ class ECRUploader:
                 except KeyError:
                     ids[_id] = len(ids)
             else:
-                ids = dict()
+                ids = {}
 
             self._stream_write(_id, status, progress, error)
 

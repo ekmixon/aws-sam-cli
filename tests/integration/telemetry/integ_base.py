@@ -21,7 +21,10 @@ from samcli.cli.main import TELEMETRY_PROMPT
 LOG = logging.getLogger(__name__)
 TELEMETRY_ENDPOINT_PORT = "18298"
 TELEMETRY_ENDPOINT_HOST = "localhost"
-TELEMETRY_ENDPOINT_URL = "http://{}:{}".format(TELEMETRY_ENDPOINT_HOST, TELEMETRY_ENDPOINT_PORT)
+TELEMETRY_ENDPOINT_URL = (
+    f"http://{TELEMETRY_ENDPOINT_HOST}:{TELEMETRY_ENDPOINT_PORT}"
+)
+
 
 # Convert line separators to work with Windows \r\n
 EXPECTED_TELEMETRY_PROMPT = re.sub(r"\n", os.linesep, TELEMETRY_PROMPT)
@@ -43,11 +46,7 @@ class IntegBase(TestCase):
 
     @classmethod
     def base_command(cls):
-        command = "sam"
-        if os.getenv("SAM_CLI_DEV"):
-            command = "samdev"
-
-        return command
+        return "samdev" if os.getenv("SAM_CLI_DEV") else "sam"
 
     def run_cmd(self, stdin_data="", optout_envvar_value=None):
         # Any command will work for this test suite
@@ -62,12 +61,15 @@ class IntegBase(TestCase):
             env["SAM_CLI_TELEMETRY"] = optout_envvar_value
 
         env["__SAM_CLI_APP_DIR"] = self.config_dir
-        env["__SAM_CLI_TELEMETRY_ENDPOINT_URL"] = "{}/metrics".format(TELEMETRY_ENDPOINT_URL)
+        env["__SAM_CLI_TELEMETRY_ENDPOINT_URL"] = f"{TELEMETRY_ENDPOINT_URL}/metrics"
 
-        process = subprocess.Popen(
-            cmd_list, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env
+        return subprocess.Popen(
+            cmd_list,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
         )
-        return process
 
     def unset_config(self):
         config_file = Path(self.config_dir, "metadata.json")
@@ -159,7 +161,7 @@ class TelemetryServer(Thread):
         return self
 
     def __exit__(self, *args, **kwargs):
-        shutdown_endpoint = "{}/_shutdown".format(TELEMETRY_ENDPOINT_URL)
+        shutdown_endpoint = f"{TELEMETRY_ENDPOINT_URL}/_shutdown"
         requests.get(shutdown_endpoint)
 
         # Flask will start shutting down only *after* the above request completes.

@@ -70,7 +70,7 @@ class ApiCollector:
 
     @property
     def routes(self) -> List[Route]:
-        return self._routes if self._routes else self.all_routes()
+        return self._routes or self.all_routes()
 
     @routes.setter
     def routes(self, routes: List[Route]) -> None:
@@ -134,7 +134,7 @@ class ApiCollector:
                 route.methods.append("OPTIONS")
             return route
 
-        return routes if not cors else [add_options_to_route(route) for route in routes]
+        return [add_options_to_route(route) for route in routes] if cors else routes
 
     @staticmethod
     def dedupe_function_routes(routes: List[Route]) -> List[Route]:
@@ -151,10 +151,9 @@ class ApiCollector:
         grouped_routes: Dict[str, Route] = {}
 
         for route in routes:
-            key = "{}-{}-{}".format(route.stack_path, route.function_name, route.path)
-            config = grouped_routes.get(key, None)
+            key = f"{route.stack_path}-{route.function_name}-{route.path}"
             methods = route.methods
-            if config:
+            if config := grouped_routes.get(key):
                 methods += config.methods
             sorted_methods = sorted(methods)
             grouped_routes[key] = Route(
@@ -182,10 +181,7 @@ class ApiCollector:
 
         binary_media_types = binary_media_types or []
         for value in binary_media_types:
-            normalized_value = self.normalize_binary_media_type(value)
-
-            # If the value is not supported, then just skip it.
-            if normalized_value:
+            if normalized_value := self.normalize_binary_media_type(value):
                 self.binary_media_types_set.add(normalized_value)
             else:
                 LOG.debug("Unsupported data type of binary media type value of resource '%s'", logical_id)
@@ -207,7 +203,4 @@ class ApiCollector:
             Normalized value. If the input was not a string, then None is returned
         """
 
-        if not isinstance(value, str):
-            return None
-
-        return value.replace("~1", "/")
+        return value.replace("~1", "/") if isinstance(value, str) else None

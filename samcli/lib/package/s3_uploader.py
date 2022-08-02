@@ -140,7 +140,7 @@ class S3Uploader:
         filemd5 = precomputed_md5 or file_checksum(file_name)
         remote_path = filemd5
         if extension:
-            remote_path = remote_path + "." + extension
+            remote_path = f"{remote_path}.{extension}"
 
         return self.upload(file_name, remote_path)
 
@@ -206,9 +206,10 @@ class S3Uploader:
             query = parse_qs(parsed.query)
 
             if parsed.netloc and parsed.path:
-                result = dict()
-                result[bucket_name_property] = parsed.netloc
-                result[object_key_property] = parsed.path.lstrip("/")
+                result = {
+                    bucket_name_property: parsed.netloc,
+                    object_key_property: parsed.path.lstrip("/"),
+                }
 
                 # If there is a query string that has a single versionId field,
                 # set the object version and return

@@ -28,11 +28,7 @@ class InvokeIntegBase(TestCase):
 
     @classmethod
     def base_command(cls):
-        command = "sam"
-        if os.getenv("SAM_CLI_DEV"):
-            command = "samdev"
-
-        return command
+        return "samdev" if os.getenv("SAM_CLI_DEV") else "sam"
 
     def get_command_list(
         self,
@@ -50,34 +46,38 @@ class InvokeIntegBase(TestCase):
         command_list = [self.cmd, "local", "invoke", function_to_invoke]
 
         if template_path:
-            command_list = command_list + ["-t", template_path]
+            command_list += ["-t", template_path]
 
         if event_path:
-            command_list = command_list + ["-e", event_path]
+            command_list += ["-e", event_path]
 
         if env_var_path:
-            command_list = command_list + ["-n", env_var_path]
+            command_list += ["-n", env_var_path]
 
         if no_event:
-            command_list = command_list + ["--no-event"]
+            command_list += ["--no-event"]
 
         if profile:
-            command_list = command_list + ["--profile", profile]
+            command_list += ["--profile", profile]
 
         if layer_cache:
-            command_list = command_list + ["--layer-cache-basedir", layer_cache]
+            command_list += ["--layer-cache-basedir", layer_cache]
 
         if docker_network:
-            command_list = command_list + ["--docker-network", docker_network]
+            command_list += ["--docker-network", docker_network]
 
         if parameter_overrides:
             arg_value = " ".join(
-                ["ParameterKey={},ParameterValue={}".format(key, value) for key, value in parameter_overrides.items()]
+                [
+                    f"ParameterKey={key},ParameterValue={value}"
+                    for key, value in parameter_overrides.items()
+                ]
             )
-            command_list = command_list + ["--parameter-overrides", arg_value]
+
+            command_list += ["--parameter-overrides", arg_value]
 
         if region:
-            command_list = command_list + ["--region", region]
+            command_list += ["--region", region]
 
         return command_list
 
@@ -91,16 +91,16 @@ class InvokeIntegBase(TestCase):
         command_list = [self.cmd, "build"]
 
         if template_path:
-            command_list = command_list + ["-t", template_path]
+            command_list += ["-t", template_path]
 
         if cached:
-            command_list = command_list + ["-c"]
+            command_list += ["-c"]
 
         if parallel:
-            command_list = command_list + ["-p"]
+            command_list += ["-p"]
 
         if use_container:
-            command_list = command_list + ["-u"]
+            command_list += ["-u"]
 
         return command_list
 

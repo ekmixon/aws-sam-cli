@@ -109,10 +109,7 @@ class Context:
             Full path of the command invoked
         """
 
-        # Uses Click's Core Context. Note, this is different from this class, also confusingly named `Context`.
-        # Click's Core Context object is the one that contains command path information.
-        click_core_ctx = click.get_current_context()
-        if click_core_ctx:
+        if click_core_ctx := click.get_current_context():
             return click_core_ctx.command_path
 
         return None
@@ -127,8 +124,7 @@ class Context:
             Template as dictionary
 
         """
-        click_core_ctx = click.get_current_context()
-        if click_core_ctx:
+        if click_core_ctx := click.get_current_context():
             return click_core_ctx.template_dict
 
         return None
@@ -153,15 +149,7 @@ class Context:
             Instance of this object, if we are running in a Click command. None otherwise.
         """
 
-        # Click has the concept of Context stacks. Think of them as linked list containing custom objects that are
-        # automatically accessible at different levels. We start from the Core Click context and discover the
-        # SAM CLI command-specific Context object which contains values for global options used by all commands.
-        #
-        # https://click.palletsprojects.com/en/7.x/complex/#ensuring-object-creation
-        #
-
-        click_core_ctx = click.get_current_context()
-        if click_core_ctx:
+        if click_core_ctx := click.get_current_context():
             return cast("Context", click_core_ctx.find_object(Context) or click_core_ctx.ensure_object(Context))
 
         return None
@@ -205,14 +193,11 @@ def get_cmd_names(cmd_name, ctx) -> List[str]:
     if not ctx:
         return []
 
-    if ctx and not getattr(ctx, "parent", None):
+    if not getattr(ctx, "parent", None):
         return [ctx.info_name]
     # Find parent of current context
     _parent = ctx.parent
-    _cmd_names = []
-    # Need to find the total set of commands that current command is part of.
-    if cmd_name != ctx.info_name:
-        _cmd_names = [cmd_name]
+    _cmd_names = [cmd_name] if cmd_name != ctx.info_name else []
     _cmd_names.append(ctx.info_name)
     # Go through all parents till a parent of a context exists.
     while _parent.parent:

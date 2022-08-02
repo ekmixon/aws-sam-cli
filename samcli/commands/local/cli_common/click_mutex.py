@@ -37,10 +37,9 @@ You can run 'sam init' without any options for an interactive initialization flo
         if self.required_params:
             req_flag = True
             for mutex_opt_list in self.required_params:
-                req_cnt = len(mutex_opt_list)
-                for mutex_opt in mutex_opt_list:
-                    if mutex_opt in opts:
-                        req_cnt -= 1
+                req_cnt = len(mutex_opt_list) - sum(
+                    mutex_opt in opts for mutex_opt in mutex_opt_list
+                )
 
                 if not req_cnt:
                     req_flag = False

@@ -200,7 +200,7 @@ class Question(Promptable):
 
         """
         if isinstance(expression, dict):
-            context = context if context else {}
+            context = context or {}
 
             # load value using key path from cookiecutter
             if "keyPath" not in expression:

@@ -101,8 +101,9 @@ class LocalApiService:
 
         print_lines = []
         for route in routes:
-            methods_str = "[{}]".format(", ".join(route.methods))
-            output = "Mounting {} at http://{}:{}{} {}".format(route.function_name, host, port, route.path, methods_str)
+            methods_str = f'[{", ".join(route.methods)}]'
+            output = f"Mounting {route.function_name} at http://{host}:{port}{route.path} {methods_str}"
+
             print_lines.append(output)
 
             LOG.info(output)

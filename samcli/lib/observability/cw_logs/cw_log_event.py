@@ -29,12 +29,13 @@ class CWLogEvent(ObservabilityEvent[dict]):
         super().__init__(event, timestamp, resource_name)
 
     def __eq__(self, other):
-        if not isinstance(other, CWLogEvent):
-            return False
-
         return (
-            self.cw_log_group == other.cw_log_group
-            and self.log_stream_name == other.log_stream_name
-            and self.timestamp == other.timestamp
-            and self.message == other.message
+            (
+                self.cw_log_group == other.cw_log_group
+                and self.log_stream_name == other.log_stream_name
+                and self.timestamp == other.timestamp
+                and self.message == other.message
+            )
+            if isinstance(other, CWLogEvent)
+            else False
         )

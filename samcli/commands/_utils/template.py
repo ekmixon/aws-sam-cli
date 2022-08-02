@@ -44,13 +44,15 @@ def get_template_data(template_file):
     """
 
     if not pathlib.Path(template_file).exists():
-        raise TemplateNotFoundException("Template file not found at {}".format(template_file))
+        raise TemplateNotFoundException(f"Template file not found at {template_file}")
 
     with open(template_file, "r", encoding="utf-8") as fp:
         try:
             return yaml_parse(fp.read())
         except (ValueError, yaml.YAMLError) as ex:
-            raise TemplateFailedParsingException("Failed to parse template: {}".format(str(ex))) from ex
+            raise TemplateFailedParsingException(
+                f"Failed to parse template: {str(ex)}"
+            ) from ex
 
 
 def move_template(src_template_path, dest_template_path, template_dict):
@@ -138,12 +140,10 @@ def _update_relative_paths(template_dict, original_root, new_root):
         for path_prop_name in METADATA_WITH_LOCAL_PATHS[resource_type]:
             path = properties.get(path_prop_name)
 
-            updated_path = _resolve_relative_to(path, original_root, new_root)
-            if not updated_path:
-                # This path does not need to get updated
-                continue
-
-            properties[path_prop_name] = updated_path
+            if updated_path := _resolve_relative_to(
+                path, original_root, new_root
+            ):
+                properties[path_prop_name] = updated_path
 
     for _, resource in template_dict.get("Resources", {}).items():
         resource_type = resource.get("Type")
@@ -156,13 +156,10 @@ def _update_relative_paths(template_dict, original_root, new_root):
             properties = resource.get("Properties", {})
 
             path = jmespath.search(path_prop_name, properties)
-            updated_path = _resolve_relative_to(path, original_root, new_root)
-
-            if not updated_path:
-                # This path does not need to get updated
-                continue
-
-            set_value_from_jmespath(properties, path_prop_name, updated_path)
+            if updated_path := _resolve_relative_to(
+                path, original_root, new_root
+            ):
+                set_value_from_jmespath(properties, path_prop_name, updated_path)
 
     # AWS::Includes can be anywhere within the template dictionary. Hence we need to recurse through the
     # dictionary in a separate method to find and update relative paths in there
@@ -181,14 +178,11 @@ def _update_aws_include_relative_path(template_dict, original_root, new_root):
         if key == "Fn::Transform":
             if isinstance(val, dict) and val.get("Name") == "AWS::Include":
                 path = val.get("Parameters", {}).get("Location", {})
-                updated_path = _resolve_relative_to(path, original_root, new_root)
-                if not updated_path:
-                    # This path does not need to get updated
-                    continue
+                if updated_path := _resolve_relative_to(
+                    path, original_root, new_root
+                ):
+                    val["Parameters"]["Location"] = updated_path
 
-                val["Parameters"]["Location"] = updated_path
-
-        # Recurse through all dictionary values
         elif isinstance(val, dict):
             _update_aws_include_relative_path(val, original_root, new_root)
         elif isinstance(val, list):
@@ -249,7 +243,7 @@ def get_template_parameters(template_file):
     Template Parameters as a dictionary
     """
     template_dict = get_template_data(template_file=template_file)
-    return template_dict.get("Parameters", dict())
+    return template_dict.get("Parameters", {})
 
 
 def get_template_artifacts_format(template_file):
@@ -292,11 +286,13 @@ def get_template_function_resource_ids(template_file, artifact):
     """
 
     template_dict = get_template_data(template_file=template_file)
-    _function_resource_ids = []
-    for resource_id, resource in template_dict.get("Resources", {}).items():
-        if resource.get("Properties", {}).get("PackageType", ZIP) == artifact and resource.get("Type") in [
+    return [
+        resource_id
+        for resource_id, resource in template_dict.get("Resources", {}).items()
+        if resource.get("Properties", {}).get("PackageType", ZIP) == artifact
+        and resource.get("Type")
+        in [
             AWS_SERVERLESS_FUNCTION,
             AWS_LAMBDA_FUNCTION,
-        ]:
-            _function_resource_ids.append(resource_id)
-    return _function_resource_ids
+        ]
+    ]

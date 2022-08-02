@@ -120,7 +120,7 @@ class Template:
             A Dictionary in the form of {question.key: answer} representing user's answers to the flows' questions
         """
         try:
-            context = context if context else {}
+            context = context or {}
             for flow in self._interactive_flows:
                 context = flow.run(context)
             return context

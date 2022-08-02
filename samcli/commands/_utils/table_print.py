@@ -40,7 +40,7 @@ def pprint_column_names(format_string, format_kwargs, margin=None, table_header=
         # Can be refactored, to allow for modularity in the shaping of the columns.
         width = width - (width % total_args)
         usable_width_no_margin = int(width) - 1
-        usable_width = int((usable_width_no_margin - (margin if margin else min_margin)))
+        usable_width = int(usable_width_no_margin - (margin or min_margin))
         if total_args > int(usable_width / 2):
             raise ValueError("Total number of columns exceed available width")
         width_per_column = int(usable_width / total_args)
@@ -67,7 +67,7 @@ def pprint_column_names(format_string, format_kwargs, margin=None, table_header=
             # which this decorator wraps, so that the function has access to the correct format_args
             kwargs["format_args"] = format_args
             kwargs["width"] = width_per_column
-            kwargs["margin"] = margin if margin else min_margin
+            kwargs["margin"] = margin or min_margin
             result = func(*args, **kwargs)
             # Complete the table
             click.secho("-" * usable_width, fg=color)

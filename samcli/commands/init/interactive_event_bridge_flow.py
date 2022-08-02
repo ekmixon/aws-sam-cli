@@ -44,7 +44,7 @@ def get_schema_template_details(schemas_api_caller):
 
 def _get_registry_cli_choice(schemas_api_caller):
     """ Returns registry choice if one registry is present otherwise prompt for selection """
-    registries = _fetch_available_registries(schemas_api_caller, dict(), None)
+    registries = _fetch_available_registries(schemas_api_caller, {}, None)
     registry_pages = registries["registry_pages"]
     # If only one registry don't prompt for choice
     if len(registry_pages) == 1 and len(registry_pages.get(0)) == 1:
@@ -88,7 +88,7 @@ def _prompt_for_registry_choice(
 
 def _get_schema_cli_choice(schemas_api_caller, registry_name):
     """ Returns registry registry choice if one registry is present otherwise prompt for  selection """
-    schemas = _fetch_available_schemas(schemas_api_caller, registry_name, dict(), None)
+    schemas = _fetch_available_schemas(schemas_api_caller, registry_name, {}, None)
     schema_pages = schemas["schema_pages"]
     # If only one schema don't prompt for choice
     if len(schema_pages) == 1 and len(schema_pages.get(0)) == 1:
@@ -137,7 +137,7 @@ def _fetch_available_schemas(schemas_api_caller, registry_name, schema_pages, ne
 
     # divided response into pages
     pages = _construct_cli_page(schemas, PAGE_LIMIT)
-    for page in range(0, len(pages)):
+    for page in range(len(pages)):
         schema_pages.update({len(schema_pages): pages.get(page)})
     next_token = list_schemas_response.get("next_token")
     return {"schema_pages": schema_pages, "next_token": next_token}
@@ -153,7 +153,7 @@ def _fetch_available_registries(schemas_api_caller, registry_pages, next_token):
 
     # divided response into pages
     pages = _construct_cli_page(registries, PAGE_LIMIT)
-    for page in range(0, len(pages)):
+    for page in range(len(pages)):
         registry_pages.update({len(registry_pages): pages.get(page)})
     next_token = list_registries_response.get("next_token")
     return {"registry_pages": registry_pages, "next_token": next_token}
@@ -168,9 +168,9 @@ def _construct_cli_page(items, item_per_page):
         for i in range((len(items) + item_per_page - 1) // item_per_page)
     ]
     index = 0
-    schema_dict = dict()
+    schema_dict = {}
     for page in pages:
-        schema_dict.update({index: page})
+        schema_dict[index] = page
         index = index + 1
 
     return schema_dict

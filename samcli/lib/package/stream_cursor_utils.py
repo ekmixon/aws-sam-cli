@@ -16,7 +16,7 @@ def cursor_down(count=1):
 
 
 def clear_line():
-    return ESC + "0K"
+    return f"{ESC}0K"
 
 
-cursor_left = ESC + "G"
+cursor_left = f"{ESC}G"

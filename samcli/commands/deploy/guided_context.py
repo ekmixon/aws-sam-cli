@@ -114,7 +114,6 @@ class GuidedContext:
         default_capabilities = self.capabilities[0] or ("CAPABILITY_IAM",)
         default_config_env = self.config_env or DEFAULT_ENV
         default_config_file = self.config_file or DEFAULT_CONFIG_FILE_NAME
-        input_capabilities = None
         config_env = None
         config_file = None
 
@@ -148,12 +147,15 @@ class GuidedContext:
             f"\t{self.start_bold}Allow SAM CLI IAM role creation{self.end_bold}", default=True
         )
 
-        if not capabilities_confirm:
-            input_capabilities = prompt(
+        input_capabilities = (
+            None
+            if capabilities_confirm
+            else prompt(
                 f"\t{self.start_bold}Capabilities{self.end_bold}",
                 default=list(default_capabilities),
                 type=FuncParamType(func=_space_separated_list_func_type),
             )
+        )
 
         self.prompt_authorization(stacks)
         self.prompt_code_signing_settings(stacks)
@@ -183,13 +185,14 @@ class GuidedContext:
         self.guided_s3_prefix = stack_name
         self.guided_region = region
         self.guided_profile = self.profile
-        self._capabilities = input_capabilities if input_capabilities else default_capabilities
+        self._capabilities = input_capabilities or default_capabilities
         self._parameter_overrides = (
-            input_parameter_overrides if input_parameter_overrides else self.parameter_overrides_from_cmdline
+            input_parameter_overrides or self.parameter_overrides_from_cmdline
         )
+
         self.save_to_config = save_to_config
-        self.config_env = config_env if config_env else default_config_env
-        self.config_file = config_file if config_file else default_config_file
+        self.config_env = config_env or default_config_env
+        self.config_file = config_file or default_config_file
         self.confirm_changeset = confirm_changeset
 
     def prompt_authorization(self, stacks: List[Stack]):
@@ -246,7 +249,7 @@ class GuidedContext:
             profile_name = prompt_profile_name(profile_name, self.start_bold, self.end_bold)
             profile_owner = prompt_profile_owner(profile_owner, self.start_bold, self.end_bold)
             self.signing_profiles[function_name] = {"profile_name": profile_name, "profile_owner": profile_owner}
-            self.signing_profiles[function_name]["profile_owner"] = "" if not profile_owner else profile_owner
+            self.signing_profiles[function_name]["profile_owner"] = profile_owner or ""
 
         for layer_name, functions_use_this_layer in layers_with_code_sign.items():
             (profile_name, profile_owner) = extract_profile_name_and_owner_from_existing(
@@ -259,7 +262,7 @@ class GuidedContext:
             profile_name = prompt_profile_name(profile_name, self.start_bold, self.end_bold)
             profile_owner = prompt_profile_owner(profile_owner, self.start_bold, self.end_bold)
             self.signing_profiles[layer_name] = {"profile_name": profile_name, "profile_owner": profile_owner}
-            self.signing_profiles[layer_name]["profile_owner"] = "" if not profile_owner else profile_owner
+            self.signing_profiles[layer_name]["profile_owner"] = profile_owner or ""
 
         LOG.debug("Signing profile names and owners %s", self.signing_profiles)
 
@@ -269,8 +272,7 @@ class GuidedContext:
         _prompted_param_overrides = {}
         if parameter_override_from_template:
             for parameter_key, parameter_properties in parameter_override_from_template.items():
-                no_echo = parameter_properties.get("NoEcho", False)
-                if no_echo:
+                if no_echo := parameter_properties.get("NoEcho", False):
                     parameter = prompt(
                         f"\t{start_bold}Parameter {parameter_key}{end_bold}", type=click.STRING, hide_input=True
                     )

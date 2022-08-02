@@ -62,8 +62,13 @@ class TestDeploy(PackageIntegBase, DeployIntegBase):
             if stack_name != SAM_CLI_STACK_NAME:
                 region = stack.get("region")
                 cf_client = (
-                    self.cf_client if not region else boto3.client("cloudformation", config=Config(region_name=region))
+                    boto3.client(
+                        "cloudformation", config=Config(region_name=region)
+                    )
+                    if region
+                    else self.cf_client
                 )
+
                 cf_client.delete_stack(StackName=stack_name)
         super().tearDown()
 
@@ -555,8 +560,9 @@ to create a managed default bucket, or run sam deploy --guided",
         deploy_command_list = self.get_deploy_command_list(template_file=template_path, guided=True)
 
         deploy_process_execute = run_command_with_input(
-            deploy_command_list, "{}\n\n\n\n\n\n\n\n\n".format(stack_name).encode()
+            deploy_command_list, f"{stack_name}\n\n\n\n\n\n\n\n\n".encode()
         )
+
 
         # Deploy should succeed with a managed stack
         self.assertEqual(deploy_process_execute.process.returncode, 0)
@@ -595,8 +601,10 @@ to create a managed default bucket, or run sam deploy --guided",
         deploy_command_list = self.get_deploy_command_list(template_file=template_path, guided=True)
 
         deploy_process_execute = run_command_with_input(
-            deploy_command_list, "{}\n\nSuppliedParameter\n\n\n\n\n\n\n".format(stack_name).encode()
+            deploy_command_list,
+            f"{stack_name}\n\nSuppliedParameter\n\n\n\n\n\n\n".encode(),
         )
+
 
         # Deploy should succeed with a managed stack
         self.assertEqual(deploy_process_execute.process.returncode, 0)
@@ -616,8 +624,9 @@ to create a managed default bucket, or run sam deploy --guided",
 
         deploy_process_execute = run_command_with_input(
             deploy_command_list,
-            "{}\n\nSuppliedParameter\n\nn\nCAPABILITY_IAM CAPABILITY_NAMED_IAM\n\n\n\n".format(stack_name).encode(),
+            f"{stack_name}\n\nSuppliedParameter\n\nn\nCAPABILITY_IAM CAPABILITY_NAMED_IAM\n\n\n\n".encode(),
         )
+
         # Deploy should succeed with a managed stack
         self.assertEqual(deploy_process_execute.process.returncode, 0)
         self.stacks.append({"name": SAM_CLI_STACK_NAME})
@@ -636,8 +645,10 @@ to create a managed default bucket, or run sam deploy --guided",
 
         # Set no for Allow SAM CLI IAM role creation, but allow default of ["CAPABILITY_IAM"] by just hitting the return key.
         deploy_process_execute = run_command_with_input(
-            deploy_command_list, "{}\n\nSuppliedParameter\n\nn\n\n\n\n\n\n".format(stack_name).encode()
+            deploy_command_list,
+            f"{stack_name}\n\nSuppliedParameter\n\nn\n\n\n\n\n\n".encode(),
         )
+
         # Deploy should succeed with a managed stack
         self.assertEqual(deploy_process_execute.process.returncode, 0)
         self.stacks.append({"name": SAM_CLI_STACK_NAME})
@@ -655,8 +666,10 @@ to create a managed default bucket, or run sam deploy --guided",
         deploy_command_list = self.get_deploy_command_list(template_file=template_path, guided=True)
 
         deploy_process_execute = run_command_with_input(
-            deploy_command_list, "{}\n\nSuppliedParameter\nY\n\nY\n\n\n\n".format(stack_name).encode()
+            deploy_command_list,
+            f"{stack_name}\n\nSuppliedParameter\nY\n\nY\n\n\n\n".encode(),
         )
+
 
         # Deploy should succeed with a managed stack
         self.assertEqual(deploy_process_execute.process.returncode, 0)
@@ -756,14 +769,13 @@ to create a managed default bucket, or run sam deploy --guided",
 
         self.stacks.append({"name": stack_name})
 
-        signing_profiles_param = None
-        if should_sign:
-            signing_profiles_param = f"HelloWorldFunctionWithCsc={signing_profile_name}"
+        signing_profiles_param = (
+            f"HelloWorldFunctionWithCsc={signing_profile_name}"
+            if should_sign
+            else None
+        )
 
-        enforce_param = "Warn"
-        if should_enforce:
-            enforce_param = "Enforce"
-
+        enforce_param = "Enforce" if should_enforce else "Warn"
         # Package and Deploy in one go without confirming change set.
         deploy_command_list = self.get_deploy_command_list(
             template_file=template_path,

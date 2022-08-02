@@ -124,9 +124,7 @@ class SamFunctionProvider(SamBaseProvider):
 
                 resource_type = resource.get("Type")
                 resource_properties = resource.get("Properties", {})
-                resource_metadata = resource.get("Metadata", None)
-                # Add extra metadata information to properties under a separate field.
-                if resource_metadata:
+                if resource_metadata := resource.get("Metadata", None):
                     resource_properties["Metadata"] = resource_metadata
 
                 if resource_type in [SamFunctionProvider.SERVERLESS_FUNCTION, SamFunctionProvider.LAMBDA_FUNCTION]:
@@ -180,7 +178,7 @@ class SamFunctionProvider(SamBaseProvider):
                     )
                     result[function.full_path] = function
 
-                # We don't care about other resource types. Just ignore them
+                        # We don't care about other resource types. Just ignore them
 
         return result
 
@@ -335,7 +333,7 @@ class SamFunctionProvider(SamBaseProvider):
             timeout=resource_properties.get("Timeout"),
             handler=resource_properties.get("Handler"),
             codeuri=codeuri,
-            imageuri=imageuri if imageuri else resource_properties.get("ImageUri"),
+            imageuri=imageuri or resource_properties.get("ImageUri"),
             imageconfig=resource_properties.get("ImageConfig"),
             environment=resource_properties.get("Environment"),
             rolearn=resource_properties.get("Role"),
@@ -343,7 +341,9 @@ class SamFunctionProvider(SamBaseProvider):
             layers=layers,
             metadata=metadata,
             inlinecode=inlinecode,
-            codesign_config_arn=resource_properties.get("CodeSigningConfigArn", None),
+            codesign_config_arn=resource_properties.get(
+                "CodeSigningConfigArn", None
+            ),
         )
 
     @staticmethod
@@ -403,10 +403,9 @@ class SamFunctionProvider(SamBaseProvider):
             # In the list of layers that is defined within a template, you can reference a LayerVersion resource.
             # When running locally, we need to follow that Ref so we can extract the local path to the layer code.
             if isinstance(layer, dict) and layer.get("Ref"):
-                found_layer = SamFunctionProvider._locate_layer_from_ref(
+                if found_layer := SamFunctionProvider._locate_layer_from_ref(
                     stack, layer, use_raw_codeuri, ignore_code_extraction_warnings
-                )
-                if found_layer:
+                ):
                     layers.append(found_layer)
             else:
                 LOG.debug(
@@ -456,7 +455,11 @@ class SamFunctionProvider(SamBaseProvider):
         )
 
     def get_resources_by_stack_path(self, stack_path: str) -> Dict:
-        candidates = [stack.resources for stack in self.stacks if stack.stack_path == stack_path]
-        if not candidates:
+        if candidates := [
+            stack.resources
+            for stack in self.stacks
+            if stack.stack_path == stack_path
+        ]:
+            return candidates[0]
+        else:
             raise RuntimeError(f"Cannot find resources with stack_path = {stack_path}")
-        return candidates[0]

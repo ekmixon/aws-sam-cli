@@ -20,26 +20,31 @@ class GuidedConfig:
 
         samconfig_dir = getattr(ctx, "samconfig_dir", None)
         samconfig = SamConfig(
-            config_dir=samconfig_dir if samconfig_dir else SamConfig.config_dir(template_file_path=self.template_file),
+            config_dir=samconfig_dir
+            or SamConfig.config_dir(template_file_path=self.template_file),
             filename=config_file or DEFAULT_CONFIG_FILE_NAME,
         )
+
         return ctx, samconfig
 
     def read_config_showcase(self, config_file=None):
         _, samconfig = self.get_config_ctx(config_file)
 
         status = "Found" if samconfig.exists() else "Not found"
-        msg = (
-            "Syntax invalid in samconfig.toml; save values "
-            "through sam deploy --guided to overwrite file with a valid set of values."
-        )
         config_sanity = samconfig.sanity_check()
         click.secho("\nConfiguring SAM deploy\n======================", fg="yellow")
         click.echo(f"\n\tLooking for config file [{config_file}] :  {status}")
         if samconfig.exists():
-            click.echo("\tReading default arguments  :  {}".format("Success" if config_sanity else "Failure"))
+            click.echo(
+                f'\tReading default arguments  :  {"Success" if config_sanity else "Failure"}'
+            )
+
 
         if not config_sanity and samconfig.exists():
+            msg = (
+                "Syntax invalid in samconfig.toml; save values "
+                "through sam deploy --guided to overwrite file with a valid set of values."
+            )
             raise GuidedDeployFailedError(msg)
 
     def save_config(
@@ -58,7 +63,7 @@ class GuidedConfig:
 
         for key, value in kwargs.items():
             if isinstance(value, (list, tuple)):
-                value = " ".join(val for val in value)
+                value = " ".join(value)
             if value:
                 samconfig.put(cmd_names, self.section, key, value, env=config_env)
 
@@ -108,4 +113,4 @@ class GuidedConfig:
 
     @staticmethod
     def quote_parameter_values(parameter_value: Any) -> str:
-        return '"{}"'.format(parameter_value)
+        return f'"{parameter_value}"'

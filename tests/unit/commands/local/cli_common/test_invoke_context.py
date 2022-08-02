@@ -964,7 +964,9 @@ class TestInvokeContext_get_env_vars_value(TestCase):
 
             msg = str(ex_ctx.exception)
             self.assertTrue(
-                msg.startswith("Could not read environment variables overrides from file {}".format(filename))
+                msg.startswith(
+                    f"Could not read environment variables overrides from file {filename}"
+                )
             )
 
 

@@ -61,15 +61,21 @@ class SamTranslatorWrapper:
 
         parser = _SamParserReimplemented()
         all_plugins = prepare_plugins(
-            additional_plugins, parameters=self.parameter_values if self.parameter_values else {}
+            additional_plugins, parameters=self.parameter_values or {}
         )
+
 
         try:
             parser.parse(template_copy, all_plugins)  # parse() will run all configured plugins
         except InvalidDocumentException as e:
             raise InvalidSamDocumentException(
-                functools.reduce(lambda message, error: message + " " + str(error), e.causes, str(e))
+                functools.reduce(
+                    lambda message, error: f"{message} {str(error)}",
+                    e.causes,
+                    str(e),
+                )
             ) from e
+
 
         return template_copy
 

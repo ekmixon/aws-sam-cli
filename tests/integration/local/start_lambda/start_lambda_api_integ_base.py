@@ -30,7 +30,7 @@ class StartLambdaIntegBaseClass(TestCase):
         # files for integ tests
         cls.template = cls.integration_dir + cls.template_path
         cls.port = str(StartLambdaIntegBaseClass.random_port())
-        cls.env_var_path = cls.integration_dir + "/testdata/invoke/vars.json"
+        cls.env_var_path = f"{cls.integration_dir}/testdata/invoke/vars.json"
 
         if cls.build_before_invoke:
             cls.build()
@@ -41,24 +41,23 @@ class StartLambdaIntegBaseClass(TestCase):
 
     @classmethod
     def build(cls):
-        command = "sam"
-        if os.getenv("SAM_CLI_DEV"):
-            command = "samdev"
+        command = "samdev" if os.getenv("SAM_CLI_DEV") else "sam"
         command_list = [command, "build"]
         if cls.build_overrides:
             overrides_arg = " ".join(
-                ["ParameterKey={},ParameterValue={}".format(key, value) for key, value in cls.build_overrides.items()]
+                [
+                    f"ParameterKey={key},ParameterValue={value}"
+                    for key, value in cls.build_overrides.items()
+                ]
             )
+
             command_list += ["--parameter-overrides", overrides_arg]
         working_dir = str(Path(cls.template).resolve().parents[0])
         run_command(command_list, cwd=working_dir)
 
     @classmethod
     def start_lambda(cls, wait_time=5):
-        command = "sam"
-        if os.getenv("SAM_CLI_DEV"):
-            command = "samdev"
-
+        command = "samdev" if os.getenv("SAM_CLI_DEV") else "sam"
         command_list = [
             command,
             "local",
@@ -81,8 +80,13 @@ class StartLambdaIntegBaseClass(TestCase):
         time.sleep(wait_time)
 
     @classmethod
-    def _make_parameter_override_arg(self, overrides):
-        return " ".join(["ParameterKey={},ParameterValue={}".format(key, value) for key, value in overrides.items()])
+    def _make_parameter_override_arg(cls, overrides):
+        return " ".join(
+            [
+                f"ParameterKey={key},ParameterValue={value}"
+                for key, value in overrides.items()
+            ]
+        )
 
     @classmethod
     def tearDownClass(cls):

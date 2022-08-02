@@ -48,7 +48,7 @@ class LambdaDebugSettings:
         entry = ["/var/rapid/aws-lambda-rie", "--log-level", "error"]
 
         if not _container_env_vars:
-            _container_env_vars = dict()
+            _container_env_vars = {}
 
         # The value of entrypoint_mapping is a callable instead of DebugSettings
         # so that DebugSetting objects are not always created.
@@ -163,7 +163,9 @@ class LambdaDebugSettings:
             if not runtime:
                 LOG.debug("Passing entrypoint as specified in template")
                 return DebugSettings(entry + debug_args_list, _container_env_vars)
-            raise DebuggingNotSupported("Debugging is not currently supported for {}".format(runtime)) from ex
+            raise DebuggingNotSupported(
+                f"Debugging is not currently supported for {runtime}"
+            ) from ex
 
     @staticmethod
     def parse_go_delve_api_version(debug_args_list: List[str]) -> int:

@@ -47,14 +47,11 @@ def get_or_default_template_file_name(ctx, param, provided_value, include_build)
         if ctx and ctx.default_map.get("template", None):
             provided_value = ctx.default_map.get("template")
         else:
-            # Default value was used. Value can either be template.yaml or template.yml.
-            # Decide based on which file exists .yml is the default, even if it does not exist.
-            provided_value = "template.yml"
+            provided_value = next(
+                (option for option in search_paths if os.path.exists(option)),
+                "template.yml",
+            )
 
-            for option in search_paths:
-                if os.path.exists(option):
-                    provided_value = option
-                    break
     result = os.path.abspath(provided_value)
 
     if ctx:
@@ -92,7 +89,7 @@ def guided_deploy_stack_name(ctx, param, provided_value):
             "be used to provide and save needed parameters for future deploys.",
         )
 
-    return provided_value if provided_value else DEFAULT_STACK_NAME
+    return provided_value or DEFAULT_STACK_NAME
 
 
 def image_repositories_callback(ctx, param, provided_value):
@@ -106,9 +103,9 @@ def image_repositories_callback(ctx, param, provided_value):
 
     image_repositories = {}
     for value in provided_value:
-        image_repositories.update(value)
+        image_repositories |= value
 
-    return image_repositories if image_repositories else None
+    return image_repositories or None
 
 
 def artifact_callback(ctx, param, provided_value, artifact):
@@ -131,11 +128,12 @@ def artifact_callback(ctx, param, provided_value, artifact):
     resolve_s3 = ctx.params.get("resolve_s3", False) or ctx.default_map.get("resolve_s3", False)
 
     required = any(
-        [
-            _template_artifact == artifact
-            for _template_artifact in get_template_artifacts_format(template_file=template_file)
-        ]
+        _template_artifact == artifact
+        for _template_artifact in get_template_artifacts_format(
+            template_file=template_file
+        )
     )
+
     # NOTE(sriram-mv): Explicit check for param name being s3_bucket
     # If that is the case, check for another option called resolve_s3 to be defined.
     # resolve_s3 option resolves for the s3 bucket automatically.
@@ -165,11 +163,12 @@ def resolve_s3_callback(ctx, param, provided_value, artifact, exc_set, exc_not_s
     )
 
     required = any(
-        [
-            _template_artifact == artifact
-            for _template_artifact in get_template_artifacts_format(template_file=template_file)
-        ]
+        _template_artifact == artifact
+        for _template_artifact in get_template_artifacts_format(
+            template_file=template_file
+        )
     )
+
     # NOTE(sriram-mv): Explicit check for s3_bucket being explicitly passed in along with `--resolve-s3`.
     # NOTE(sriram-mv): Both params and default_map need to be checked, as the option can be either be
     # passed in directly or through configuration file.

@@ -393,7 +393,7 @@ class Deployer:
                     stack_change_in_progress = False
                     break
             except botocore.exceptions.ClientError as ex:
-                retry_attempts = retry_attempts + 1
+                retry_attempts += 1
                 if retry_attempts > self.max_attempts:
                     LOG.error("Describing stack events for %s failed: %s", stack_name, str(ex))
                     return
@@ -417,9 +417,9 @@ class Deployer:
             The type of the changeset, 'CREATE' or 'UPDATE'
         """
         sys.stdout.write(
-            "\n{} - Waiting for stack create/update "
-            "to complete\n".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            f'\n{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - Waiting for stack create/update to complete\n'
         )
+
         sys.stdout.flush()
 
         self.describe_stack_events(stack_name, self.get_last_event_time(stack_name))
@@ -443,8 +443,7 @@ class Deployer:
 
             raise deploy_exceptions.DeployFailedError(stack_name=stack_name, msg=str(ex))
 
-        outputs = self.get_stack_outputs(stack_name=stack_name, echo=False)
-        if outputs:
+        if outputs := self.get_stack_outputs(stack_name=stack_name, echo=False):
             self._display_stack_outputs(outputs)
 
     def create_and_wait_for_changeset(

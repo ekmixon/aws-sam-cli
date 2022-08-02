@@ -1181,5 +1181,5 @@ class TestSamFunctionProvider_get_all(TestCase):
     def test_must_work_with_no_functions(self):
         provider = SamFunctionProvider([])
 
-        result = [f for f in provider.get_all()]
+        result = list(provider.get_all())
         self.assertEqual(result, [])

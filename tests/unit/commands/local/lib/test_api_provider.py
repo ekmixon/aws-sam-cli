@@ -20,7 +20,7 @@ class TestApiProvider_init(TestCase):
 
         provider = ApiProvider([stack_mock])
         self.assertEqual(len(provider.routes), 3)
-        self.assertEqual(provider.routes, set(["set", "of", "values"]))
+        self.assertEqual(provider.routes, {"set", "of", "values"})
 
 
 class TestApiProviderSelection(TestCase):

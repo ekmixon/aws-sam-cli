@@ -53,7 +53,7 @@ class TestCfnParameterOverridesType(TestCase):
     )
     def test_unsupported_formats(self, input, expected):
         result = self.param_type.convert(input, None, None)
-        self.assertEqual(result, expected, msg="Failed with Input = " + str(input))
+        self.assertEqual(result, expected, msg=f"Failed with Input = {str(input)}")
 
     @parameterized.expand(
         [
@@ -143,7 +143,7 @@ class TestCfnParameterOverridesType(TestCase):
     )
     def test_successful_parsing(self, input, expected):
         result = self.param_type.convert(input, None, None)
-        self.assertEqual(result, expected, msg="Failed with Input = " + str(input))
+        self.assertEqual(result, expected, msg=f"Failed with Input = {str(input)}")
 
 
 class TestCfnMetadataType(TestCase):
@@ -189,7 +189,7 @@ class TestCfnMetadataType(TestCase):
     )
     def test_successful_parsing(self, input, expected):
         result = self.param_type.convert(input, None, None)
-        self.assertEqual(result, expected, msg="Failed with Input = " + input)
+        self.assertEqual(result, expected, msg=f"Failed with Input = {input}")
 
 
 class TestCfnTags(TestCase):
@@ -238,7 +238,7 @@ class TestCfnTags(TestCase):
     )
     def test_successful_parsing(self, input, expected):
         result = self.param_type.convert(input, None, None)
-        self.assertEqual(result, expected, msg="Failed with Input = " + str(input))
+        self.assertEqual(result, expected, msg=f"Failed with Input = {str(input)}")
 
 
 class TestCodeSignOptionType(TestCase):
@@ -298,7 +298,7 @@ class TestCodeSignOptionType(TestCase):
     )
     def test_successful_parsing(self, input, expected):
         result = self.param_type.convert(input, None, None)
-        self.assertEqual(result, expected, msg="Failed with Input = " + str(input))
+        self.assertEqual(result, expected, msg=f"Failed with Input = {str(input)}")
 
 
 class TestImageRepositoryType(TestCase):
@@ -339,7 +339,7 @@ class TestImageRepositoryType(TestCase):
     )
     def test_successful_parsing(self, input, expected):
         result = self.param_type.convert(input, self.mock_param, Mock())
-        self.assertEqual(result, expected, msg="Failed with Input = " + str(input))
+        self.assertEqual(result, expected, msg=f"Failed with Input = {str(input)}")
 
 
 class TestImageRepositoriesType(TestCase):
@@ -382,4 +382,4 @@ class TestImageRepositoriesType(TestCase):
     )
     def test_successful_parsing(self, input, expected):
         result = self.param_type.convert(input, self.mock_param, Mock())
-        self.assertEqual(result, expected, msg="Failed with Input = " + str(input))
+        self.assertEqual(result, expected, msg=f"Failed with Input = {str(input)}")

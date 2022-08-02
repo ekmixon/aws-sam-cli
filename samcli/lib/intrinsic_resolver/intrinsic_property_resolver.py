@@ -192,7 +192,10 @@ class IntrinsicResolver:
         The simplified version of the intrinsic function. This could be a list,str,dict depending on the format required
         """
         if intrinsic is None:
-            raise InvalidIntrinsicException("Missing Intrinsic property in {}".format(parent_function))
+            raise InvalidIntrinsicException(
+                f"Missing Intrinsic property in {parent_function}"
+            )
+
         if isinstance(intrinsic, list):
             return [self.intrinsic_property_resolver(item, ignore_errors) for item in intrinsic]
         if not isinstance(intrinsic, dict) or intrinsic == {}:
@@ -220,13 +223,10 @@ class IntrinsicResolver:
                 sanitized_val = self.intrinsic_property_resolver(val, ignore_errors, parent_function=parent_function)
                 verify_intrinsic_type_str(
                     sanitized_key,
-                    message="The keys of the dictionary {} in {} must all resolve to a string".format(
-                        sanitized_key, parent_function
-                    ),
+                    message=f"The keys of the dictionary {sanitized_key} in {parent_function} must all resolve to a string",
                 )
+
                 sanitized_dict[sanitized_key] = sanitized_val
-            # On any exception, leave the key:val of the orginal intact and continue on.
-            # https://github.com/awslabs/aws-sam-cli/issues/1386
             except Exception:
                 if ignore_errors:
                     LOG.debug("Unable to resolve property %s: %s. Leaving as is.", key, val)
@@ -277,13 +277,15 @@ class IntrinsicResolver:
                 processed_dict[processed_key] = processed_resource
             except (InvalidIntrinsicException, InvalidSymbolException) as e:
                 resource_type = val.get("Type", "")
-                if ignore_errors:
-                    LOG.error("Unable to process properties of %s.%s", key, resource_type)
-                    processed_dict[key] = val
-                else:
+                if not ignore_errors:
                     raise InvalidIntrinsicException(
-                        "Exception with property of {}.{}".format(key, resource_type) + ": " + str(e.args)
+                        f"Exception with property of {key}.{resource_type}"
+                        + ": "
+                        + str(e.args)
                     ) from e
+
+                LOG.error("Unable to process properties of %s.%s", key, resource_type)
+                processed_dict[key] = val
         return processed_dict
 
     def handle_fn_join(self, intrinsic_value, ignore_errors):
@@ -319,8 +321,9 @@ class IntrinsicResolver:
         verify_intrinsic_type_list(
             value_list,
             IntrinsicResolver.FN_JOIN,
-            message="The list of values in {} after the " "delimiter must be a list".format(IntrinsicResolver.FN_JOIN),
+            message=f"The list of values in {IntrinsicResolver.FN_JOIN} after the delimiter must be a list",
         )
+
 
         sanitized_value_list = [
             self.intrinsic_property_resolver(item, ignore_errors, parent_function=IntrinsicResolver.FN_JOIN)
@@ -480,24 +483,25 @@ class IntrinsicResolver:
             map_value,
             IntrinsicResolver.FN_FIND_IN_MAP,
             position_in_list="first",
-            message="The MapName is missing in the Mappings dictionary in Fn::FindInMap  for {}".format(map_name),
+            message=f"The MapName is missing in the Mappings dictionary in Fn::FindInMap  for {map_name}",
         )
+
 
         top_level_value = map_value.get(top_level_key)
         verify_intrinsic_type_dict(
             top_level_value,
             IntrinsicResolver.FN_FIND_IN_MAP,
-            message="The TopLevelKey is missing in the Mappings dictionary in Fn::FindInMap "
-            "for {}".format(top_level_key),
+            message=f"The TopLevelKey is missing in the Mappings dictionary in Fn::FindInMap for {top_level_key}",
         )
+
 
         second_level_value = top_level_value.get(second_level_key)
         verify_intrinsic_type_str(
             second_level_value,
             IntrinsicResolver.FN_FIND_IN_MAP,
-            message="The SecondLevelKey is missing in the Mappings dictionary in Fn::FindInMap  "
-            "for {}".format(second_level_key),
+            message=f"The SecondLevelKey is missing in the Mappings dictionary in Fn::FindInMap  for {second_level_key}",
         )
+
 
         return second_level_value
 
@@ -529,8 +533,9 @@ class IntrinsicResolver:
 
         if intrinsic_value not in self._symbol_resolver.REGIONS:
             raise InvalidIntrinsicException(
-                "Invalid region string passed in to {}".format(IntrinsicResolver.FN_GET_AZS)
+                f"Invalid region string passed in to {IntrinsicResolver.FN_GET_AZS}"
             )
+
 
         return self._symbol_resolver.REGIONS.get(intrinsic_value)
 
@@ -556,8 +561,9 @@ class IntrinsicResolver:
 
         if name not in IntrinsicResolver.SUPPORTED_MACRO_TRANSFORMATIONS:
             raise InvalidIntrinsicException(
-                "The type {} is not currently supported in {}".format(name, IntrinsicResolver.FN_TRANSFORM)
+                f"The type {name} is not currently supported in {IntrinsicResolver.FN_TRANSFORM}"
             )
+
 
         parameters = intrinsic_value.get("Parameters")
         verify_intrinsic_type_dict(
@@ -565,9 +571,7 @@ class IntrinsicResolver:
         )
 
         location = self.intrinsic_property_resolver(parameters.get("Location"), ignore_errors)
-        location_data = get_template_data(location)
-
-        return location_data
+        return get_template_data(location)
 
     @staticmethod
     def handle_fn_import_value(intrinsic_value, ignore_errors):
@@ -738,8 +742,9 @@ class IntrinsicResolver:
         verify_intrinsic_type_dict(
             condition,
             IntrinsicResolver.FN_IF,
-            message="The condition is missing in the Conditions dictionary for {}".format(IntrinsicResolver.FN_IF),
+            message=f"The condition is missing in the Conditions dictionary for {IntrinsicResolver.FN_IF}",
         )
+
 
         condition_evaluated = self.intrinsic_property_resolver(
             condition, ignore_errors, parent_function=IntrinsicResolver.FN_IF
@@ -747,8 +752,9 @@ class IntrinsicResolver:
         verify_intrinsic_type_bool(
             condition_evaluated,
             IntrinsicResolver.FN_IF,
-            message="The result of {} must evaluate to bool".format(IntrinsicResolver.FN_IF),
+            message=f"The result of {IntrinsicResolver.FN_IF} must evaluate to bool",
         )
+
 
         return value_if_true if condition_evaluated else value_if_false
 
@@ -818,8 +824,9 @@ class IntrinsicResolver:
         verify_intrinsic_type_bool(
             argument_sanitised,
             IntrinsicResolver.FN_NOT,
-            message="The result of {} must evaluate to bool".format(IntrinsicResolver.FN_NOT),
+            message=f"The result of {IntrinsicResolver.FN_NOT} must evaluate to bool",
         )
+
         return not argument_sanitised
 
     @staticmethod
@@ -829,7 +836,7 @@ class IntrinsicResolver:
         :param i:
         :return:
         """
-        prefix = "{} th ".format(str(i))
+        prefix = f"{str(i)} th "
         if i == 1:
             prefix = "first "
         elif i == 2:

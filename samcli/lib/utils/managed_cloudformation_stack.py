@@ -60,12 +60,13 @@ def manage_stack(
     """
     try:
         if profile:
-            session = boto3.Session(profile_name=profile, region_name=region if region else None)  # type: ignore
+            session = boto3.Session(profile_name=profile, region_name=region or None)
             cloudformation_client = session.client("cloudformation")
         else:
             cloudformation_client = boto3.client(
-                "cloudformation", config=Config(region_name=region if region else None)
+                "cloudformation", config=Config(region_name=region or None)
             )
+
     except ProfileNotFound as ex:
         raise CredentialsError(
             f"Error Setting Up Managed Stack Client: the provided AWS name profile '{profile}' is not found. "
@@ -135,7 +136,7 @@ def _check_sanity_of_stack(stack):
     # Sanity check for non-none stack? Sanity check for tag?
     try:
         sam_cli_tag = next(t for t in tags if t["Key"] == "ManagedStackSource")
-        if not sam_cli_tag["Value"] == "AwsSamCli":
+        if sam_cli_tag["Value"] != "AwsSamCli":
             msg = (
                 "Stack "
                 + stack_name
@@ -147,9 +148,11 @@ def _check_sanity_of_stack(stack):
             raise UserException(msg)
     except StopIteration as ex:
         msg = (
-            "Stack  " + stack_name + " exists, but the ManagedStackSource tag is missing. "
+            f"Stack  {stack_name}"
+            + " exists, but the ManagedStackSource tag is missing. "
             "Failing as the stack was likely not created by the AWS SAM CLI."
         )
+
         raise UserException(msg) from ex
 
 

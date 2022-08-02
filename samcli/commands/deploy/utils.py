@@ -94,5 +94,5 @@ def hide_noecho_parameter_overrides(template_parameters, parameter_overrides):
     for key, value in hidden_params.items():
         if isinstance(params, dict) and key in params and isinstance(params[key], dict):
             is_hidden = params[key].get("NoEcho", False)
-            hidden_params[key] = value if not is_hidden else "*" * 5
+            hidden_params[key] = "*" * 5 if is_hidden else value
     return hidden_params

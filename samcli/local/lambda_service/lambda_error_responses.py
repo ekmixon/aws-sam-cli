@@ -55,7 +55,7 @@ class LambdaErrorResponses:
         return BaseLocalService.service_response(
             LambdaErrorResponses._construct_error_response_body(
                 LambdaErrorResponses.USER_ERROR,
-                "Function not found: arn:aws:lambda:us-west-2:012345678901:function:{}".format(function_name),
+                f"Function not found: arn:aws:lambda:us-west-2:012345678901:function:{function_name}",
             ),
             LambdaErrorResponses._construct_headers(exception_tuple[0]),
             exception_tuple[1],
@@ -103,7 +103,8 @@ class LambdaErrorResponses:
 
         return BaseLocalService.service_response(
             LambdaErrorResponses._construct_error_response_body(
-                LambdaErrorResponses.USER_ERROR, "Unsupported content type: {}".format(content_type)
+                LambdaErrorResponses.USER_ERROR,
+                f"Unsupported content type: {content_type}",
             ),
             LambdaErrorResponses._construct_headers(exception_tuple[0]),
             exception_tuple[1],

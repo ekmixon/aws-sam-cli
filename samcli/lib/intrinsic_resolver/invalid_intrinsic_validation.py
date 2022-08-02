@@ -20,8 +20,10 @@ def verify_intrinsic_type_int(argument, property_type="", message="", position_i
     # Special case since bool is a subclass of int in python
     if isinstance(argument, bool):
         raise InvalidIntrinsicException(
-            message or "The {} argument to {} must resolve to a {} type".format(position_in_list, property_type, int)
+            message
+            or f"The {position_in_list} argument to {property_type} must resolve to a {int} type"
         )
+
     verify_intrinsic_type(argument, property_type, message, position_in_list, primitive_type=int)
 
 
@@ -33,7 +35,7 @@ def verify_non_null(argument, property_type="", message="", position_in_list="")
     if argument is None:
         raise InvalidIntrinsicException(
             message
-            or "The {} argument to {} is missing from the intrinsic function".format(position_in_list, property_type)
+            or f"The {position_in_list} argument to {property_type} is missing from the intrinsic function"
         )
 
 
@@ -42,23 +44,21 @@ def verify_intrinsic_type(argument, property_type="", message="", position_in_li
     if not isinstance(argument, primitive_type):
         raise InvalidIntrinsicException(
             message
-            or "The {} argument to {} must resolve to a {} type".format(position_in_list, property_type, primitive_type)
+            or f"The {position_in_list} argument to {property_type} must resolve to a {primitive_type} type"
         )
 
 
 def verify_in_bounds(objects, index, property_type=""):
     if index < 0 or index >= len(objects):
         raise InvalidIntrinsicException(
-            "The index of {} resolved properties must be within the range".format(property_type)
+            f"The index of {property_type} resolved properties must be within the range"
         )
 
 
 def verify_number_arguments(arguments, property_type="", num=0):
-    if not len(arguments) == num:
+    if len(arguments) != num:
         raise InvalidIntrinsicException(
-            "The arguments to {} must have {} arguments instead of {} arguments".format(
-                property_type, num, len(arguments)
-            )
+            f"The arguments to {property_type} must have {num} arguments instead of {len(arguments)} arguments"
         )
 
 

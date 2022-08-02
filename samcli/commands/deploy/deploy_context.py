@@ -117,8 +117,10 @@ class DeployContext:
 
         if not isinstance(template_dict, dict):
             raise deploy_exceptions.DeployFailedError(
-                stack_name=self.stack_name, msg="{} not in required format".format(self.template_file)
+                stack_name=self.stack_name,
+                msg=f"{self.template_file} not in required format",
             )
+
 
         parameters = self.merge_parameters(template_dict, self.parameter_overrides)
 
@@ -127,12 +129,16 @@ class DeployContext:
             raise deploy_exceptions.DeployBucketRequiredError()
         boto_config = get_boto_config_with_user_agent()
         cloudformation_client = boto3.client(
-            "cloudformation", region_name=self.region if self.region else None, config=boto_config
+            "cloudformation", region_name=self.region or None, config=boto_config
         )
+
 
         s3_client = None
         if self.s3_bucket:
-            s3_client = boto3.client("s3", region_name=self.region if self.region else None, config=boto_config)
+            s3_client = boto3.client(
+                "s3", region_name=self.region or None, config=boto_config
+            )
+
 
             self.s3_uploader = S3Uploader(
                 s3_client, self.s3_bucket, self.s3_prefix, self.kms_key_id, self.force_upload, self.no_progressbar

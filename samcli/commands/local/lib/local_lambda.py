@@ -108,11 +108,13 @@ class LocalLambdaRunner:
 
         if not function:
             all_function_full_paths = [f.full_path for f in self.provider.get_all()]
-            available_function_message = "{} not found. Possible options in your template: {}".format(
-                function_identifier, all_function_full_paths
-            )
+            available_function_message = f"{function_identifier} not found. Possible options in your template: {all_function_full_paths}"
+
             LOG.info(available_function_message)
-            raise FunctionNotFound("Unable to find a Function with name '{}'".format(function_identifier))
+            raise FunctionNotFound(
+                f"Unable to find a Function with name '{function_identifier}'"
+            )
+
 
         LOG.debug("Found one Lambda function with name '%s'", function_identifier)
         if function.packagetype == ZIP:
@@ -143,11 +145,9 @@ class LocalLambdaRunner:
             # pylint: disable=no-member
             if hasattr(os_error, "winerror") and os_error.winerror == 1314:  # type: ignore
                 raise NoPrivilegeException(
-                    "Administrator, Windows Developer Mode, "
-                    "or SeCreateSymbolicLinkPrivilege is required to create symbolic link for files: {}, {}".format(
-                        os_error.filename, os_error.filename2
-                    )
+                    f"Administrator, Windows Developer Mode, or SeCreateSymbolicLinkPrivilege is required to create symbolic link for files: {os_error.filename}, {os_error.filename2}"
                 ) from os_error
+
 
             raise
 

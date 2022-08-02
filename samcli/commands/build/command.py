@@ -277,24 +277,24 @@ def do_cli(  # pylint: disable=too-many-locals, too-many-statements
     processed_build_images = _process_image_options(build_image)
 
     with BuildContext(
-        function_identifier,
-        template,
-        base_dir,
-        build_dir,
-        cache_dir,
-        cached,
-        clean=clean,
-        manifest_path=manifest_path,
-        use_container=use_container,
-        parameter_overrides=parameter_overrides,
-        docker_network=docker_network,
-        skip_pull_image=skip_pull_image,
-        mode=mode,
-        container_env_var=processed_env_vars,
-        container_env_var_file=container_env_var_file,
-        build_images=processed_build_images,
-        aws_region=click_ctx.region,
-    ) as ctx:
+            function_identifier,
+            template,
+            base_dir,
+            build_dir,
+            cache_dir,
+            cached,
+            clean=clean,
+            manifest_path=manifest_path,
+            use_container=use_container,
+            parameter_overrides=parameter_overrides,
+            docker_network=docker_network,
+            skip_pull_image=skip_pull_image,
+            mode=mode,
+            container_env_var=processed_env_vars,
+            container_env_var_file=container_env_var_file,
+            build_images=processed_build_images,
+            aws_region=click_ctx.region,
+        ) as ctx:
         try:
             builder = ApplicationBuilder(
                 ctx.resources_to_build,
@@ -364,7 +364,7 @@ def do_cli(  # pylint: disable=too-many-locals, too-many-statements
             # Some Exceptions have a deeper wrapped exception that needs to be surfaced
             # from deeper than just one level down.
             deep_wrap = getattr(ex, "wrapped_from", None)
-            wrapped_from = deep_wrap if deep_wrap else ex.__class__.__name__
+            wrapped_from = deep_wrap or ex.__class__.__name__
             raise UserException(str(ex), wrapped_from=wrapped_from) from ex
 
 
@@ -372,13 +372,13 @@ def gen_success_msg(artifacts_dir: str, output_template_path: str, is_default_bu
 
     invoke_cmd = "sam local invoke"
     if not is_default_build_dir:
-        invoke_cmd += " -t {}".format(output_template_path)
+        invoke_cmd += f" -t {output_template_path}"
 
     deploy_cmd = "sam deploy --guided"
     if not is_default_build_dir:
-        deploy_cmd += " --template-file {}".format(output_template_path)
+        deploy_cmd += f" --template-file {output_template_path}"
 
-    msg = """\nBuilt Artifacts  : {artifacts_dir}
+    return """\nBuilt Artifacts  : {artifacts_dir}
 Built Template   : {template}
 
 Commands you can use next
@@ -386,10 +386,11 @@ Commands you can use next
 [*] Invoke Function: {invokecmd}
 [*] Deploy: {deploycmd}
     """.format(
-        invokecmd=invoke_cmd, deploycmd=deploy_cmd, artifacts_dir=artifacts_dir, template=output_template_path
+        invokecmd=invoke_cmd,
+        deploycmd=deploy_cmd,
+        artifacts_dir=artifacts_dir,
+        template=output_template_path,
     )
-
-    return msg
 
 
 def _get_mode_value_from_envvar(name: str, choices: List[str]) -> Optional[str]:
@@ -399,7 +400,10 @@ def _get_mode_value_from_envvar(name: str, choices: List[str]) -> Optional[str]:
         return None
 
     if mode not in choices:
-        raise click.UsageError("Invalid value for 'mode': invalid choice: {}. (choose from {})".format(mode, choices))
+        raise click.UsageError(
+            f"Invalid value for 'mode': invalid choice: {mode}. (choose from {choices})"
+        )
+
 
     return mode
 
@@ -458,7 +462,7 @@ def _process_image_options(image_args: Optional[Tuple[str]]) -> Dict:
         Function as key and the corresponding image URI as value.
         Global default image URI is contained in the None key.
     """
-    build_images: Dict[Optional[str], str] = dict()
+    build_images: Dict[Optional[str], str] = {}
     if image_args:
         for build_image_string in image_args:
             function_name, image_uri = _parse_key_value_pair(build_image_string)

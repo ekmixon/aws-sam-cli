@@ -79,7 +79,7 @@ class GitRepo:
             except OSError as ex:
                 LOG.debug("Unable to find executable %s", executable, exc_info=ex)
 
-        raise OSError("Cannot find git, was looking at executables: {}".format(executables))
+        raise OSError(f"Cannot find git, was looking at executables: {executables}")
 
     def clone(self, clone_dir: Path, clone_name: str, replace_existing: bool = False) -> Path:
         """

@@ -55,7 +55,10 @@ class GuidedContext:
             )
         )
         has_env_creds = os.getenv(EnvProvider.ACCESS_KEY) and os.getenv(EnvProvider.SECRET_KEY)
-        click.echo(f"\t1 - Environment variables{' (not available)' if not has_env_creds else ''}")
+        click.echo(
+            f"\t1 - Environment variables{'' if has_env_creds else ' (not available)'}"
+        )
+
         for i, profile in enumerate(profiles):
             click.echo(f"\t{i + 2} - {profile} (named profile)")
         click.echo("\tq - Quit and configure AWS credentials")

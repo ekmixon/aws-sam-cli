@@ -62,8 +62,7 @@ def signer_config_per_function(stacks: List[Stack]):
                     if layer_name in layers_with_code_sign:
                         layers_with_code_sign[layer_name].add(function_name)
                     else:
-                        functions_that_is_referring_to_function = set()
-                        functions_that_is_referring_to_function.add(function_name)
+                        functions_that_is_referring_to_function = {function_name}
                         layers_with_code_sign[layer_name] = functions_that_is_referring_to_function
 
     return functions_with_code_sign, layers_with_code_sign

@@ -22,17 +22,18 @@ def download(count=100):
             response = requests.get(
                 sar_browse_url,
                 {
-                    "pageSize": count if count < 10 else 10,
+                    "pageSize": min(count, 10),
                     "pageNumber": current_page,
                     "includeAppsWithCapabilities": "CAPABILITY_IAM,CAPABILITY_NAMED_IAM,CAPABILITY_RESOURCE_POLICY,CAPABILITY_AUTO_EXPAND",
                 },
             )
 
+
             response.raise_for_status()
             result = response.json()
 
             # Successful request
-            apps = apps + result["applications"]
+            apps += result["applications"]
             current_page += 1
             retry_count = 0
         except requests.exceptions.RequestException as ex:
@@ -42,7 +43,7 @@ def download(count=100):
     for index, app in enumerate(apps):
         app_id = app["id"]
         name = app["name"]
-        template_file_name = os.path.join(TEMPLATE_FOLDER, name + "-template.yaml")
+        template_file_name = os.path.join(TEMPLATE_FOLDER, f"{name}-template.yaml")
         LOG.info("[%s/%s] %s", index, count, name)
         _download_templates(app_id, template_file_name)
         time.sleep(0.1)  # 100ms aka 10 TPS

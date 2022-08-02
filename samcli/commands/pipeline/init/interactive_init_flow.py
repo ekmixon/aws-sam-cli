@@ -321,8 +321,7 @@ def _clone_pipeline_templates(repo_url: str, clone_dir: Path, clone_name: str) -
     """
     try:
         repo: GitRepo = GitRepo(repo_url)
-        clone_path: Path = repo.clone(clone_dir, clone_name, replace_existing=True)
-        return clone_path
+        return repo.clone(clone_dir, clone_name, replace_existing=True)
     except (OSError, CloneRepoException) as ex:
         raise PipelineTemplateCloneException(str(ex)) from ex
 
@@ -359,10 +358,7 @@ def _prompt_pipeline_template(pipeline_templates_manifest: PipelineTemplatesMani
     provider_pipeline_templates: List[PipelineTemplateMetadata] = [
         t for t in pipeline_templates_manifest.templates if t.provider == provider.id
     ]
-    selected_template_manifest: PipelineTemplateMetadata = _prompt_provider_pipeline_template(
-        provider_pipeline_templates
-    )
-    return selected_template_manifest
+    return _prompt_provider_pipeline_template(provider_pipeline_templates)
 
 
 def _prompt_cicd_provider(available_providers: List[Provider]) -> Provider:

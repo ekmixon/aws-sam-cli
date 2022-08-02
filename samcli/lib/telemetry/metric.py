@@ -1,6 +1,7 @@
 """
 Provides methods to generate and send metrics
 """
+
 from timeit import default_timer
 from functools import wraps, reduce
 
@@ -29,7 +30,7 @@ This creates a versitile telemetry tracking no matter where in the code. Somethi
 No side effect will result in this as it is write-only for code outside of telemetry.
 Decorators should be used to minimize logic involving telemetry.
 """
-_METRICS = dict()
+_METRICS = {}
 
 
 def send_installed_metric():
@@ -125,11 +126,7 @@ def track_command(func):
             # Capture exception information and re-raise it later so we can first send metrics.
             exception = ex
             exit_code = ex.exit_code
-            if ex.wrapped_from is None:
-                exit_reason = type(ex).__name__
-            else:
-                exit_reason = ex.wrapped_from
-
+            exit_reason = type(ex).__name__ if ex.wrapped_from is None else ex.wrapped_from
         except Exception as ex:
             exception = ex
             # Standard Unix practice to return exit code 255 on fatal/unhandled exit.
@@ -294,7 +291,7 @@ class Metric:
     """
 
     def __init__(self, metric_name, should_add_common_attributes=True):
-        self._data = dict()
+        self._data = {}
         self._metric_name = metric_name
         self._gc = GlobalConfig()
         self._session_id = self._default_session_id()
@@ -306,7 +303,7 @@ class Metric:
 
     def add_list_data(self, key, value):
         if key not in self._data:
-            self._data[key] = list()
+            self._data[key] = []
 
         if not isinstance(self._data[key], list):
             # raise MetricDataNotList()
@@ -339,10 +336,7 @@ class Metric:
         Fail silently if Context does not exist.
         """
         try:
-            ctx = Context.get_current_context()
-            if ctx:
-                return ctx.session_id
-            return None
+            return ctx.session_id if (ctx := Context.get_current_context()) else None
         except RuntimeError:
             LOG.debug("Unable to find Click Context for getting session_id.")
             return None
@@ -360,9 +354,7 @@ class Metric:
             Name of the environment where SAM CLI is executed in.
         """
         cicd_platform: Optional[CICDPlatform] = self._cicd_detector.platform()
-        if cicd_platform:
-            return cicd_platform.name
-        return "CLI"
+        return cicd_platform.name if cicd_platform else "CLI"
 
 
 class MetricDataNotList(Exception):

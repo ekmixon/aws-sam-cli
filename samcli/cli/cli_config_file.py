@@ -232,18 +232,15 @@ def decorator_customize_config_file(f):
     :param f: Callback function passed by Click
     :return: Callback function
     """
-    config_file_attrs = {}
     config_file_param_decls = ("--config-file",)
-    config_file_attrs["help"] = (
-        "The path and file name of the configuration file containing default parameter values to use. "
-        "Its default value is 'samconfig.toml' in project directory. For more information about configuration files, "
-        "see: "
-        "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html."
-    )
-    config_file_attrs["default"] = "samconfig.toml"
-    config_file_attrs["is_eager"] = True
-    config_file_attrs["required"] = False
-    config_file_attrs["type"] = click.STRING
+    config_file_attrs = {
+        "help": "The path and file name of the configuration file containing default parameter values to use. Its default value is 'samconfig.toml' in project directory. For more information about configuration files, see: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html.",
+        "default": "samconfig.toml",
+        "is_eager": True,
+        "required": False,
+        "type": click.STRING,
+    }
+
     return click.option(*config_file_param_decls, **config_file_attrs)(f)
 
 
@@ -254,17 +251,15 @@ def decorator_customize_config_env(f):
     :param f: Callback function passed by Click
     :return: Callback function
     """
-    config_env_attrs = {}
     config_env_param_decls = ("--config-env",)
-    config_env_attrs["help"] = (
-        "The environment name specifying the default parameter values in the configuration file to use. "
-        "Its default value is 'default'. For more information about configuration files, see: "
-        "https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html."
-    )
-    config_env_attrs["default"] = "default"
-    config_env_attrs["is_eager"] = True
-    config_env_attrs["required"] = False
-    config_env_attrs["type"] = click.STRING
+    config_env_attrs = {
+        "help": "The environment name specifying the default parameter values in the configuration file to use. Its default value is 'default'. For more information about configuration files, see: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html.",
+        "default": "default",
+        "is_eager": True,
+        "required": False,
+        "type": click.STRING,
+    }
+
     return click.option(*config_env_param_decls, **config_env_attrs)(f)
 
 

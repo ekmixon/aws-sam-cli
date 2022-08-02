@@ -303,8 +303,7 @@ class InvokeContext:
 
         # There are more functions in the template, and function identifier is not provided, hence raise.
         raise InvokeContextException(
-            "You must provide a function logical ID when there are more than one functions in your template. "
-            "Possible options in your template: {}".format(all_function_full_paths)
+            f"You must provide a function logical ID when there are more than one functions in your template. Possible options in your template: {all_function_full_paths}"
         )
 
     @property
@@ -353,7 +352,7 @@ class InvokeContext:
         samcli.lib.utils.stream_writer.StreamWriter
             Stream writer for stdout
         """
-        stream = self._log_file_handle if self._log_file_handle else osutils.stdout()
+        stream = self._log_file_handle or osutils.stdout()
         return StreamWriter(stream, self._is_debugging)
 
     @property
@@ -366,7 +365,7 @@ class InvokeContext:
         samcli.lib.utils.stream_writer.StreamWriter
             Stream writer for stderr
         """
-        stream = self._log_file_handle if self._log_file_handle else osutils.stderr()
+        stream = self._log_file_handle or osutils.stderr()
         return StreamWriter(stream, self._is_debugging)
 
     @property
@@ -430,7 +429,7 @@ class InvokeContext:
 
         except Exception as ex:
             raise InvokeContextException(
-                "Could not read environment variables overrides from file {}: {}".format(filename, str(ex))
+                f"Could not read environment variables overrides from file {filename}: {str(ex)}"
             ) from ex
 
     @staticmethod
@@ -441,10 +440,7 @@ class InvokeContext:
         :param string log_file: Path to a file where the logs should be written to
         :return: Handle to the opened log file, if necessary. None otherwise
         """
-        if not log_file:
-            return None
-
-        return open(log_file, "wb")
+        return open(log_file, "wb") if log_file else None
 
     @staticmethod
     def _get_debug_context(
@@ -486,12 +482,18 @@ class InvokeContext:
                 debugger = Path(debugger_path).resolve(strict=True)
             except OSError as error:
                 if error.errno == errno.ENOENT:
-                    raise DebugContextException("'{}' could not be found.".format(debugger_path)) from error
+                    raise DebugContextException(
+                        f"'{debugger_path}' could not be found."
+                    ) from error
+
 
                 raise error
 
             if not debugger.is_dir():
-                raise DebugContextException("'{}' should be a directory with the debugger in it.".format(debugger_path))
+                raise DebugContextException(
+                    f"'{debugger_path}' should be a directory with the debugger in it."
+                )
+
             debugger_path = str(debugger)
 
         return DebugContext(

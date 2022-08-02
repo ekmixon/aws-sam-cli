@@ -18,7 +18,7 @@ class PublishAppIntegBase(TestCase):
         cls.region_name = os.environ.get("AWS_DEFAULT_REGION")
         """Please read comments in package_integ_base.py for more details around this."""
         cls.pre_created_bucket = os.environ.get(os.environ.get("AWS_S3"), False)
-        cls.bucket_name = cls.pre_created_bucket if cls.pre_created_bucket else str(uuid.uuid4())
+        cls.bucket_name = cls.pre_created_bucket or str(uuid.uuid4())
         cls.bucket_name_placeholder = "<bucket-name>"
         cls.application_name_placeholder = "<application-name>"
         cls.temp_dir = Path(tempfile.mkdtemp())
@@ -55,7 +55,7 @@ class PublishAppIntegBase(TestCase):
     @classmethod
     def replace_template_placeholder(cls, placeholder, replace_text):
         for f in cls.temp_dir.iterdir():
-            if f.suffix == ".yaml" or f.suffix == ".json":
+            if f.suffix in [".yaml", ".json"]:
                 content = f.read_text(encoding="utf-8")
                 f.write_text(content.replace(placeholder, replace_text))
 
@@ -76,28 +76,24 @@ class PublishAppIntegBase(TestCase):
         stripped_std_output = std_output.replace("\n", "").replace("\r", "").replace(" ", "")
         # Assert expected app metadata in the std output regardless of key order
         for key, value in app_metadata.items():
-            self.assertIn('"{}":{}'.format(key, json.dumps(value)), stripped_std_output)
+            self.assertIn(f'"{key}":{json.dumps(value)}', stripped_std_output)
 
     def base_command(self):
-        command = "sam"
-        if os.getenv("SAM_CLI_DEV"):
-            command = "samdev"
-
-        return command
+        return "samdev" if os.getenv("SAM_CLI_DEV") else "sam"
 
     def get_command_list(self, template_path=None, region=None, profile=None, semantic_version=None):
         command_list = [self.base_command(), "publish"]
 
         if template_path:
-            command_list = command_list + ["-t", str(template_path)]
+            command_list += ["-t", str(template_path)]
 
         if region:
-            command_list = command_list + ["--region", region]
+            command_list += ["--region", region]
 
         if profile:
-            command_list = command_list + ["--profile", profile]
+            command_list += ["--profile", profile]
 
         if semantic_version:
-            command_list = command_list + ["--semantic-version", semantic_version]
+            command_list += ["--semantic-version", semantic_version]
 
         return command_list

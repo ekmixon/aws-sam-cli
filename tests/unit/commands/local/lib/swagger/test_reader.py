@@ -311,13 +311,13 @@ class TestSamSwaggerReader_parse_s3_location(TestCase):
         self.assertEqual(result, (self.bucket, self.key, None))
 
     def test_must_parse_s3_uri_string(self):
-        location = "s3://{}/{}?versionId={}".format(self.bucket, self.key, self.version)
+        location = f"s3://{self.bucket}/{self.key}?versionId={self.version}"
 
         result = SwaggerReader._parse_s3_location(location)
         self.assertEqual(result, (self.bucket, self.key, self.version))
 
     def test_must_parse_s3_uri_string_without_version_id(self):
-        location = "s3://{}/{}".format(self.bucket, self.key)
+        location = f"s3://{self.bucket}/{self.key}"
 
         result = SwaggerReader._parse_s3_location(location)
         self.assertEqual(result, (self.bucket, self.key, None))

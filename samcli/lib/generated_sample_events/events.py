@@ -144,7 +144,7 @@ class Events:
             return str_checksum(val)
 
         # raise exception if hashing_scheme is unsupported
-        raise ValueError("Hashing_scheme {} is not supported.".format(hashing_scheme))
+        raise ValueError(f"Hashing_scheme {hashing_scheme} is not supported.")
 
     def generate_event(self, service_name: str, event_type: str, values_to_sub: Dict) -> str:
         """

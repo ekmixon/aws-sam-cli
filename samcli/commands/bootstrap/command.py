@@ -29,4 +29,4 @@ def cli(ctx):
 
 def do_cli(region, profile):
     bucket_name = bootstrap.manage_stack(profile=profile, region=region)
-    click.echo("Source Bucket: " + bucket_name)
+    click.echo(f"Source Bucket: {bucket_name}")

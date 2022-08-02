@@ -296,7 +296,7 @@ class TestCloudFormationStageValues(TestCase):
         template = {"Resources": resources}
         provider = ApiProvider(make_mock_stacks_from_template(template))
 
-        result = [f for f in provider.get_all()]
+        result = list(provider.get_all())
         routes = result[0].routes
 
         route1 = Route(path="/path", methods=["GET"], function_name="NoApiEventFunction")
@@ -335,17 +335,18 @@ class TestCloudFormationResourceMethod(TestCase):
         self.assertEqual(provider.routes, [Route(function_name=None, path="/{proxy+}", methods=["POST"])])
 
     def test_resolve_correct_resource_path(self):
-        resources = {
-            "RootApiResource": {
-                "Tyoe": "AWS::ApiGateway::Resource",
-                "Properties": {"PathPart": "root", "ResourceId": "TestApi"},
-            }
-        }
         beta_resource = {
             "Tyoe": "AWS::ApiGateway::Resource",
             "Properties": {"PathPart": "beta", "ResourceId": "TestApi", "ParentId": "RootApiResource"},
         }
-        resources["BetaApiResource"] = beta_resource
+        resources = {
+            "RootApiResource": {
+                "Tyoe": "AWS::ApiGateway::Resource",
+                "Properties": {"PathPart": "root", "ResourceId": "TestApi"},
+            },
+            "BetaApiResource": beta_resource,
+        }
+
         provider = CfnApiProvider()
         full_path = provider.resolve_resource_path(resources, beta_resource, "/test")
         self.assertEqual(full_path, "/root/beta/test")
@@ -1091,7 +1092,7 @@ class TestCloudFormationWithApiGatewayV2Stage(TestCase):
         template = {"Resources": resources}
         provider = ApiProvider(make_mock_stacks_from_template(template))
 
-        result = [f for f in provider.get_all()]
+        result = list(provider.get_all())
         routes = result[0].routes
 
         route1 = Route(path="/path", methods=["GET"], function_name="NoApiEventFunction")

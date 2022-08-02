@@ -190,8 +190,7 @@ class GlobalConfig:
 
     def _get_config_file_path(self, filename):
         self._create_dir()
-        filepath = self.config_dir.joinpath(filename)
-        return filepath
+        return self.config_dir.joinpath(filename)
 
     def _get_or_set_uuid(self, key):
         """

@@ -87,40 +87,42 @@ class CfnBaseApiProvider:
             Resource properties for Cors
         """
         cors = None
-        if cors_prop and isinstance(cors_prop, dict):
-            allow_methods = self._get_cors_prop(cors_prop, "AllowMethods")
-            if allow_methods:
-                allow_methods = CfnBaseApiProvider.normalize_cors_allow_methods(allow_methods)
-            else:
-                allow_methods = ",".join(sorted(Route.ANY_HTTP_METHODS))
-
-            allow_origin = self._get_cors_prop(cors_prop, "AllowOrigin")
-            allow_headers = self._get_cors_prop(cors_prop, "AllowHeaders")
-            allow_credentials = self._get_cors_prop(cors_prop, "AllowCredentials", True)
-            max_age = self._get_cors_prop(cors_prop, "MaxAge")
-
-            cors = Cors(
-                allow_origin=allow_origin,
-                allow_methods=allow_methods,
-                allow_headers=allow_headers,
-                allow_credentials=allow_credentials,
-                max_age=max_age,
-            )
-        elif cors_prop and isinstance(cors_prop, str):
-            allow_origin = cors_prop
-            if not (allow_origin.startswith("'") and allow_origin.endswith("'")):
-                raise InvalidSamDocumentException(
-                    "Cors Properties must be a quoted string " '(i.e. "\'*\'" is correct, but "*" is not).'
+        if cors_prop:
+            if isinstance(cors_prop, dict):
+                allow_methods = self._get_cors_prop(cors_prop, "AllowMethods")
+                allow_methods = (
+                    CfnBaseApiProvider.normalize_cors_allow_methods(allow_methods)
+                    if allow_methods
+                    else ",".join(sorted(Route.ANY_HTTP_METHODS))
                 )
-            allow_origin = allow_origin.strip("'")
 
-            cors = Cors(
-                allow_origin=allow_origin,
-                allow_methods=",".join(sorted(Route.ANY_HTTP_METHODS)),
-                allow_headers=None,
-                allow_credentials=None,
-                max_age=None,
-            )
+                allow_origin = self._get_cors_prop(cors_prop, "AllowOrigin")
+                allow_headers = self._get_cors_prop(cors_prop, "AllowHeaders")
+                allow_credentials = self._get_cors_prop(cors_prop, "AllowCredentials", True)
+                max_age = self._get_cors_prop(cors_prop, "MaxAge")
+
+                cors = Cors(
+                    allow_origin=allow_origin,
+                    allow_methods=allow_methods,
+                    allow_headers=allow_headers,
+                    allow_credentials=allow_credentials,
+                    max_age=max_age,
+                )
+            elif isinstance(cors_prop, str):
+                allow_origin = cors_prop
+                if not (allow_origin.startswith("'") and allow_origin.endswith("'")):
+                    raise InvalidSamDocumentException(
+                        "Cors Properties must be a quoted string " '(i.e. "\'*\'" is correct, but "*" is not).'
+                    )
+                allow_origin = allow_origin.strip("'")
+
+                cors = Cors(
+                    allow_origin=allow_origin,
+                    allow_methods=",".join(sorted(Route.ANY_HTTP_METHODS)),
+                    allow_headers=None,
+                    allow_credentials=None,
+                    max_age=None,
+                )
         return cors
 
     @staticmethod
@@ -156,8 +158,9 @@ class CfnBaseApiProvider:
 
             if not (prop.startswith("'") and prop.endswith("'")):
                 raise InvalidSamDocumentException(
-                    "{} must be a quoted string " '(i.e. "\'value\'" is correct, but "value" is not).'.format(prop_name)
+                    f"""{prop_name} must be a quoted string (i.e. "\'value\'" is correct, but "value" is not)."""
                 )
+
             prop = prop.strip("'")
         return prop
 
@@ -175,41 +178,43 @@ class CfnBaseApiProvider:
             Resource properties for CorsConfiguration
         """
         cors = None
-        if cors_prop and isinstance(cors_prop, dict):
-            allow_methods = self._get_cors_prop_http(cors_prop, "AllowMethods", list)
-            if isinstance(allow_methods, list):
-                allow_methods = CfnBaseApiProvider.normalize_cors_allow_methods(allow_methods)
-            else:
-                allow_methods = ",".join(sorted(Route.ANY_HTTP_METHODS))
+        if cors_prop:
+            if isinstance(cors_prop, dict):
+                allow_methods = self._get_cors_prop_http(cors_prop, "AllowMethods", list)
+                allow_methods = (
+                    CfnBaseApiProvider.normalize_cors_allow_methods(allow_methods)
+                    if isinstance(allow_methods, list)
+                    else ",".join(sorted(Route.ANY_HTTP_METHODS))
+                )
 
-            allow_origins = self._get_cors_prop_http(cors_prop, "AllowOrigins", list)
-            if isinstance(allow_origins, list):
-                allow_origins = ",".join(allow_origins)
-            allow_headers = self._get_cors_prop_http(cors_prop, "AllowHeaders", list)
-            if isinstance(allow_headers, list):
-                allow_headers = ",".join(allow_headers)
+                allow_origins = self._get_cors_prop_http(cors_prop, "AllowOrigins", list)
+                if isinstance(allow_origins, list):
+                    allow_origins = ",".join(allow_origins)
+                allow_headers = self._get_cors_prop_http(cors_prop, "AllowHeaders", list)
+                if isinstance(allow_headers, list):
+                    allow_headers = ",".join(allow_headers)
 
-            # Read AllowCredentials but only output the header with the case-sensitive value of true
-            # (see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials)
-            allow_credentials = "true" if self._get_cors_prop_http(cors_prop, "AllowCredentials", bool) else None
+                # Read AllowCredentials but only output the header with the case-sensitive value of true
+                # (see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials)
+                allow_credentials = "true" if self._get_cors_prop_http(cors_prop, "AllowCredentials", bool) else None
 
-            max_age = self._get_cors_prop_http(cors_prop, "MaxAge", int)
+                max_age = self._get_cors_prop_http(cors_prop, "MaxAge", int)
 
-            cors = Cors(
-                allow_origin=allow_origins,
-                allow_methods=allow_methods,
-                allow_headers=allow_headers,
-                allow_credentials=allow_credentials,
-                max_age=max_age,
-            )
-        elif cors_prop and isinstance(cors_prop, bool) and cors_prop:
-            cors = Cors(
-                allow_origin="*",
-                allow_methods=",".join(sorted(Route.ANY_HTTP_METHODS)),
-                allow_headers=None,
-                allow_credentials=None,
-                max_age=None,
-            )
+                cors = Cors(
+                    allow_origin=allow_origins,
+                    allow_methods=allow_methods,
+                    allow_headers=allow_headers,
+                    allow_credentials=allow_credentials,
+                    max_age=max_age,
+                )
+            elif isinstance(cors_prop, bool):
+                cors = Cors(
+                    allow_origin="*",
+                    allow_methods=",".join(sorted(Route.ANY_HTTP_METHODS)),
+                    allow_headers=None,
+                    allow_credentials=None,
+                    max_age=None,
+                )
         return cors
 
     @staticmethod
@@ -235,13 +240,12 @@ class CfnBaseApiProvider:
         Value with matching type
         """
         prop = cors_dict.get(prop_name)
-        if prop:
-            if not isinstance(prop, expect_type):
-                LOG.warning(
-                    "CORS Property %s was not fully resolved. Will proceed as if the Property was not defined.",
-                    prop_name,
-                )
-                return None
+        if prop and not isinstance(prop, expect_type):
+            LOG.warning(
+                "CORS Property %s was not fully resolved. Will proceed as if the Property was not defined.",
+                prop_name,
+            )
+            return None
         return prop
 
     @staticmethod
@@ -268,7 +272,10 @@ class CfnBaseApiProvider:
         for method in methods:
             normalized_method = method.strip().upper()
             if normalized_method not in Route.ANY_HTTP_METHODS:
-                raise InvalidSamDocumentException("The method {} is not a valid CORS method".format(normalized_method))
+                raise InvalidSamDocumentException(
+                    f"The method {normalized_method} is not a valid CORS method"
+                )
+
             normalized_methods.append(normalized_method)
 
         if "OPTIONS" not in normalized_methods:

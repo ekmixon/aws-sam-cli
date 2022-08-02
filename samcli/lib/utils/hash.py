@@ -27,11 +27,8 @@ def file_checksum(file_name: str) -> str:
         curpos = file_handle.tell()
         file_handle.seek(0)
 
-        buf = file_handle.read(BLOCK_SIZE)
-        while buf:
+        while buf := file_handle.read(BLOCK_SIZE):
             md5.update(buf)
-            buf = file_handle.read(BLOCK_SIZE)
-
         # Restore file cursor's position
         file_handle.seek(curpos)
 
@@ -54,7 +51,7 @@ def dir_checksum(directory: str, followlinks: bool = True, ignore_list: Optional
     """
     ignore_set = set(ignore_list or [])
     md5_dir = hashlib.md5()
-    files = list()
+    files = []
     # Walk through given directory and find all directories and files.
     for dirpath, dirnames, filenames in os.walk(directory, followlinks=followlinks):
         # > When topdown is True, the caller can modify the dirnames list in-place
@@ -63,10 +60,15 @@ def dir_checksum(directory: str, followlinks: bool = True, ignore_list: Optional
         # > https://docs.python.org/library/os.html#os.walk
         dirnames[:] = [dirname for dirname in dirnames if dirname not in ignore_set]
         # Go through every file in the directory and sub-directory.
-        for filepath in [os.path.join(dirpath, filename) for filename in filenames if filename not in ignore_set]:
-            # Look at filename and contents.
-            # Encode file's checksum to be utf-8 and bytes.
-            files.append(filepath)
+        files.extend(
+            iter(
+                [
+                    os.path.join(dirpath, filename)
+                    for filename in filenames
+                    if filename not in ignore_set
+                ]
+            )
+        )
 
     files.sort()
     for file in files:

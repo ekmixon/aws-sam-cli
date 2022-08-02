@@ -74,11 +74,7 @@ class SamLocalStackProvider(SamBaseProvider):
                           None, if application is not found
         :raises ValueError If name is not given
         """
-        for f in self.get_all():
-            if f.name == name:
-                return f
-
-        return None
+        return next((f for f in self.get_all() if f.name == name), None)
 
     def get_all(self) -> Iterator[Stack]:
         """
@@ -101,9 +97,7 @@ class SamLocalStackProvider(SamBaseProvider):
 
             resource_type = resource.get("Type")
             resource_properties = resource.get("Properties", {})
-            resource_metadata = resource.get("Metadata", None)
-            # Add extra metadata information to properties under a separate field.
-            if resource_metadata:
+            if resource_metadata := resource.get("Metadata", None):
                 resource_properties["Metadata"] = resource_metadata
 
             stack: Optional[Stack] = None
@@ -253,7 +247,9 @@ class SamLocalStackProvider(SamBaseProvider):
 
     @staticmethod
     def is_remote_url(url: str) -> bool:
-        return any([url.startswith(prefix) for prefix in ["s3://", "http://", "https://"]])
+        return any(
+            url.startswith(prefix) for prefix in ["s3://", "http://", "https://"]
+        )
 
     @staticmethod
     def find_root_stack(stacks: List[Stack]) -> Stack:
@@ -286,7 +282,7 @@ class SamLocalStackProvider(SamBaseProvider):
             merged dict containing both global and stack-specific parameters
         """
         merged_parameter_overrides = {}
-        merged_parameter_overrides.update(global_parameter_overrides or {})
+        merged_parameter_overrides |= (global_parameter_overrides or {})
         merged_parameter_overrides.update(parameter_overrides or {})
         return merged_parameter_overrides
 

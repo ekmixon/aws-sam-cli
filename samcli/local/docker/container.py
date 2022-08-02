@@ -147,7 +147,7 @@ class Container:
         }
 
         if self._container_opts:
-            kwargs.update(self._container_opts)
+            kwargs |= self._container_opts
 
         if self._additional_volumes:
             kwargs["volumes"].update(self._additional_volumes)
@@ -173,7 +173,7 @@ class Container:
 
         if self._memory_limit_mb:
             # Ex: 128m => 128MB
-            kwargs["mem_limit"] = "{}m".format(self._memory_limit_mb)
+            kwargs["mem_limit"] = f"{self._memory_limit_mb}m"
 
         if self.network_id == "host":
             kwargs["network_mode"] = self.network_id

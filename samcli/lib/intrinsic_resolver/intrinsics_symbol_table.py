@@ -217,22 +217,18 @@ class IntrinsicsSymbolTable:
 
         resolver = self.default_type_resolver.get(resource_type, {}).get(resource_attribute) if resource_type else {}
         if resolver:
-            if callable(resolver):
-                return resolver(logical_id)
-            return resolver
-
-        # Handle Attribute Type Resolution
-        attribute_resolver = self.common_attribute_resolver.get(resource_attribute, {})
-        if attribute_resolver:
+            return resolver(logical_id) if callable(resolver) else resolver
+        if attribute_resolver := self.common_attribute_resolver.get(
+            resource_attribute, {}
+        ):
             if callable(attribute_resolver):
                 return attribute_resolver(logical_id)
             return attribute_resolver
 
         if ignore_errors:
-            return "${}".format(logical_id + "." + resource_attribute)
+            return f"${logical_id}.{resource_attribute}"
         raise InvalidSymbolException(
-            "The {} is not supported in the logical_id_translator, default_type_resolver, or the attribute_resolver."
-            " It is also not a supported pseudo function".format(logical_id + "." + resource_attribute)
+            f"The {logical_id}.{resource_attribute} is not supported in the logical_id_translator, default_type_resolver, or the attribute_resolver. It is also not a supported pseudo function"
         )
 
     def arn_resolver(self, logical_id, service_name="lambda"):
@@ -258,14 +254,12 @@ class IntrinsicsSymbolTable:
         partition_name = self.handle_pseudo_partition()
         if service_name == "lambda":
             resource_name = self._get_function_name(logical_id)
-            resource_name = self.logical_id_translator.get(resource_name) or resource_name
-
             str_format = "arn:{partition_name}:{service_name}:{aws_region}:{account_id}:function:{resource_name}"
         else:
             resource_name = logical_id
-            resource_name = self.logical_id_translator.get(resource_name) or resource_name
-
             str_format = "arn:{partition_name}:{service_name}:{aws_region}:{account_id}:{resource_name}"
+
+        resource_name = self.logical_id_translator.get(resource_name) or resource_name
 
         return str_format.format(
             partition_name=partition_name,

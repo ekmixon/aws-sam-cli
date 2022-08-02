@@ -25,7 +25,10 @@ def do_download_source_code_binding(runtime, schema_template_details, schemas_ap
     schema_version = schema_template_details["schema_version"]
     schemas_runtime = SAM_RUNTIME_TO_SCHEMAS_CODE_LANG_MAPPING.get(runtime)
     try:
-        click.echo("Event code binding Registry: %s and Schema: %s" % (registry_name, schema_name))
+        click.echo(
+            f"Event code binding Registry: {registry_name} and Schema: {schema_name}"
+        )
+
         click.echo("Generating code bindings...")
         # Optimistically try to get the code bindings first...
         return schemas_api_caller.download_source_code_binding(

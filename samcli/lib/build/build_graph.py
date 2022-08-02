@@ -347,7 +347,7 @@ class LayerBuildDefinition(AbstractBuildDefinition):
         self.codeuri = codeuri
         self.build_method = build_method
         self.compatible_runtimes = compatible_runtimes
-        self.env_vars = env_vars if env_vars else {}
+        self.env_vars = env_vars or {}
         # Note(xinhol): In our code, we assume "layer" is never None. We should refactor
         # this and move "layer" out of LayerBuildDefinition to take advantage of type check.
         self.layer: LayerVersion = None  # type: ignore
@@ -372,15 +372,16 @@ class LayerBuildDefinition(AbstractBuildDefinition):
         bool
             True if both layer build definitions has same following properties, False otherwise
         """
-        if not isinstance(other, LayerBuildDefinition):
-            return False
-
         return (
-            self.name == other.name
-            and self.codeuri == other.codeuri
-            and self.build_method == other.build_method
-            and self.compatible_runtimes == other.compatible_runtimes
-            and self.env_vars == other.env_vars
+            (
+                self.name == other.name
+                and self.codeuri == other.codeuri
+                and self.build_method == other.build_method
+                and self.compatible_runtimes == other.compatible_runtimes
+                and self.env_vars == other.env_vars
+            )
+            if isinstance(other, LayerBuildDefinition)
+            else False
         )
 
 
@@ -402,8 +403,8 @@ class FunctionBuildDefinition(AbstractBuildDefinition):
         self.runtime = runtime
         self.codeuri = codeuri
         self.packagetype = packagetype
-        self.metadata = metadata if metadata else {}
-        self.env_vars = env_vars if env_vars else {}
+        self.metadata = metadata or {}
+        self.env_vars = env_vars or {}
         self.functions: List[Function] = []
 
     def add_function(self, function: Function) -> None:

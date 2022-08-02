@@ -26,9 +26,11 @@ def manage_stack(profile, region):
     bucket_name = outputs.get("SourceBucket")
     if bucket_name is None:
         msg = (
-            "Stack " + SAM_CLI_STACK_NAME + " exists, but is missing the managed source bucket key. "
+            f"Stack {SAM_CLI_STACK_NAME}"
+            + " exists, but is missing the managed source bucket key. "
             "Failing as this stack was likely not created by the AWS SAM CLI."
         )
+
         raise UserException(msg)
     # This bucket name is what we would write to a config file
     return bucket_name
@@ -51,7 +53,11 @@ def get_current_account_id(profile: Optional[str] = None):
 
 def _get_stack_template():
     gc = GlobalConfig()
-    info = {"version": __version__, "installationId": gc.installation_id if gc.installation_id else "unknown"}
+    info = {
+        "version": __version__,
+        "installationId": gc.installation_id or "unknown",
+    }
+
 
     template = """
     AWSTemplateFormatVersion : '2010-09-09'

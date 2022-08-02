@@ -64,7 +64,6 @@ class InitTemplates:
             for o in options:
                 if o.get("displayName") is not None:
                     msg = "\t" + str(choice_num) + " - " + o.get("displayName")
-                    click.echo(msg)
                 else:
                     msg = (
                         "\t"
@@ -74,7 +73,7 @@ class InitTemplates:
                         + " with dependency manager "
                         + dependency_manager
                     )
-                    click.echo(msg)
+                click.echo(msg)
                 choice_num = choice_num + 1
             choice = click.prompt("Template selection", type=click.Choice(choices), show_choices=False)
             template_md = options[int(choice) - 1]  # zero index
@@ -101,7 +100,7 @@ class InitTemplates:
     def _check_app_template(entry: Dict, app_template: str) -> bool:
         # we need to cast it to bool because entry["appTemplate"] can be Any, and Any's __eq__ can return Any
         # detail: https://github.com/python/mypy/issues/5697
-        return bool(entry["appTemplate"] == app_template)
+        return entry["appTemplate"] == app_template
 
     def init_options(self, package_type, runtime, base_image, dependency_manager):
         if not self._git_repo.clone_attempted:
@@ -142,17 +141,21 @@ class InitTemplates:
     @staticmethod
     def _init_options_from_bundle(package_type, runtime, dependency_manager):
         for mapping in list(itertools.chain(*(RUNTIME_DEP_TEMPLATE_MAPPING.values()))):
-            if runtime in mapping["runtimes"] or any([r.startswith(runtime) for r in mapping["runtimes"]]):
-                if not dependency_manager or dependency_manager == mapping["dependency_manager"]:
-                    if package_type == IMAGE:
-                        mapping["appTemplate"] = "hello-world-lambda-image"
-                        mapping["init_location"] = get_local_lambda_images_location(mapping, runtime)
-                    else:
-                        mapping["appTemplate"] = "hello-world"  # when bundled, use this default template name
-                    return [mapping]
-        msg = "Lambda Runtime {} and dependency manager {} does not have an available initialization template.".format(
-            runtime, dependency_manager
-        )
+            if (
+                runtime in mapping["runtimes"]
+                or any(r.startswith(runtime) for r in mapping["runtimes"])
+            ) and (
+                not dependency_manager
+                or dependency_manager == mapping["dependency_manager"]
+            ):
+                if package_type == IMAGE:
+                    mapping["appTemplate"] = "hello-world-lambda-image"
+                    mapping["init_location"] = get_local_lambda_images_location(mapping, runtime)
+                else:
+                    mapping["appTemplate"] = "hello-world"  # when bundled, use this default template name
+                return [mapping]
+        msg = f"Lambda Runtime {runtime} and dependency manager {dependency_manager} does not have an available initialization template."
+
         raise InvalidInitTemplateError(msg)
 
     def is_dynamic_schemas_template(self, package_type, app_template, runtime, base_image, dependency_manager):
@@ -167,7 +170,11 @@ class InitTemplates:
         :return:
         """
         options = self.init_options(package_type, runtime, base_image, dependency_manager)
-        for option in options:
-            if option.get("appTemplate") == app_template:
-                return option.get("isDynamicTemplate", False)
-        return False
+        return next(
+            (
+                option.get("isDynamicTemplate", False)
+                for option in options
+                if option.get("appTemplate") == app_template
+            ),
+            False,
+        )

@@ -31,7 +31,7 @@ class Test_get_template_data(TestCase):
             get_template_data(filename)
 
         ex = exception_ctx.exception
-        self.assertEqual(str(ex), "Template file not found at {}".format(filename))
+        self.assertEqual(str(ex), f"Template file not found at {filename}")
 
     @patch("samcli.commands._utils.template.yaml_parse")
     @patch("samcli.commands._utils.template.pathlib")
@@ -141,7 +141,7 @@ class Test_update_relative_paths(TestCase):
 
         self.expected_result = os.path.join("..", "foo", "bar")
 
-    @parameterized.expand([(resource_type, props) for resource_type, props in METADATA_WITH_LOCAL_PATHS.items()])
+    @parameterized.expand(list(METADATA_WITH_LOCAL_PATHS.items()))
     def test_must_update_relative_metadata_paths(self, resource_type, properties):
 
         for propname in properties:
@@ -160,7 +160,7 @@ class Test_update_relative_paths(TestCase):
                 self.maxDiff = None
                 self.assertEqual(result, expected_template_dict)
 
-    @parameterized.expand([(resource_type, props) for resource_type, props in RESOURCES_WITH_LOCAL_PATHS.items()])
+    @parameterized.expand(list(RESOURCES_WITH_LOCAL_PATHS.items()))
     def test_must_update_relative_resource_paths(self, resource_type, properties):
         for propname in properties:
             template_dict = {

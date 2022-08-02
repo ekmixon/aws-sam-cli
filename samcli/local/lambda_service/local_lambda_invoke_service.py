@@ -100,15 +100,17 @@ class LocalLambdaInvokeService(BaseLocalService):
         if log_type != "None":
             LOG.debug("log-type: %s is not supported. None is only supported.", log_type)
             return LambdaErrorResponses.not_implemented_locally(
-                "log-type: {} is not supported. None is only supported.".format(log_type)
+                f"log-type: {log_type} is not supported. None is only supported."
             )
+
 
         invocation_type = request_headers.get("X-Amz-Invocation-Type", "RequestResponse")
         if invocation_type != "RequestResponse":
             LOG.warning("invocation-type: %s is not supported. RequestResponse is only supported.", invocation_type)
             return LambdaErrorResponses.not_implemented_locally(
-                "invocation-type: {} is not supported. RequestResponse is only supported.".format(invocation_type)
+                f"invocation-type: {invocation_type} is not supported. RequestResponse is only supported."
             )
+
 
         return None
 

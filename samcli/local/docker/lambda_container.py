@@ -81,8 +81,8 @@ class LambdaContainer(Container):
         container_host_interface
             Optional. Interface that Docker host binds ports to
         """
-        if not Runtime.has_value(runtime) and not packagetype == IMAGE:
-            raise ValueError("Unsupported Lambda runtime {}".format(runtime))
+        if not Runtime.has_value(runtime) and packagetype != IMAGE:
+            raise ValueError(f"Unsupported Lambda runtime {runtime}")
 
         image = LambdaContainer._get_image(lambda_image, runtime, packagetype, imageuri, layers)
         ports = LambdaContainer._get_exposed_ports(debug_options)
@@ -116,12 +116,12 @@ class LambdaContainer(Container):
         env_vars = {**env_vars, **container_env_vars}
         super().__init__(
             image,
-            _command if _command else [],
+            _command or [],
             _work_dir,
             code_dir,
             memory_limit_mb=memory_mb,
             exposed_ports=ports,
-            entrypoint=_entrypoint if _entrypoint else entry,
+            entrypoint=_entrypoint or entry,
             env_vars=env_vars,
             container_opts=additional_options,
             additional_volumes=additional_volumes,
@@ -143,15 +143,11 @@ class LambdaContainer(Container):
         if not debug_options:
             return None
 
-        if not debug_options.debug_ports:
-            return None
-
-        # container port : host port
-        ports_map = {}
-        for port in debug_options.debug_ports:
-            ports_map[port] = port
-
-        return ports_map
+        return (
+            {port: port for port in debug_options.debug_ports}
+            if debug_options.debug_ports
+            else None
+        )
 
     @staticmethod
     def _get_additional_options(runtime: str, debug_options):

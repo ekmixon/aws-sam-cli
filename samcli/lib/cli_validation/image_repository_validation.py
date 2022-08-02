@@ -33,15 +33,17 @@ def image_repository_validation(func):
         # looking for resources that have an IMAGE based packagetype.
 
         required = any(
-            [
-                _template_artifact == IMAGE
-                for _template_artifact in get_template_artifacts_format(template_file=template_file)
-            ]
+            _template_artifact == IMAGE
+            for _template_artifact in get_template_artifacts_format(
+                template_file=template_file
+            )
         )
+
 
         validators = [
             Validator(
-                validation_function=lambda: image_repository and image_repositories,
+                validation_function=lambda: image_repository
+                and image_repositories,
                 exception=click.BadOptionUsage(
                     option_name="--image-repositories",
                     ctx=ctx,
@@ -50,7 +52,10 @@ def image_repository_validation(func):
                 ),
             ),
             Validator(
-                validation_function=lambda: not guided and not (image_repository or image_repositories) and required,
+                validation_function=lambda: not guided
+                and not image_repository
+                and not image_repositories
+                and required,
                 exception=click.BadOptionUsage(
                     option_name="--image-repositories",
                     ctx=ctx,
@@ -60,7 +65,12 @@ def image_repository_validation(func):
             Validator(
                 validation_function=lambda: not guided
                 and (
-                    set(image_repositories.keys()) != set(get_template_function_resource_ids(template_file, IMAGE))
+                    set(image_repositories.keys())
+                    != set(
+                        get_template_function_resource_ids(
+                            template_file, IMAGE
+                        )
+                    )
                     and image_repositories
                 ),
                 exception=click.BadOptionUsage(
@@ -70,6 +80,7 @@ def image_repository_validation(func):
                 ),
             ),
         ]
+
         for validator in validators:
             validator.validate()
         # Call Original function after validation.

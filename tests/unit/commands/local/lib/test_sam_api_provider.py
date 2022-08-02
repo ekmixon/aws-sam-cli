@@ -180,7 +180,7 @@ class TestSamApiProviderWithImplicitApis(TestCase):
 
         provider = ApiProvider(make_mock_stacks_from_template(template))
 
-        result = [f for f in provider.get_all()]
+        result = list(provider.get_all())
         routes = result[0].routes
         route1 = Route(path="/path", methods=["GET"], function_name="SamFunc1")
         route2 = Route(path="/path", methods=["POST"], function_name="SamFunc2")
@@ -193,7 +193,7 @@ class TestSamApiProviderWithImplicitApis(TestCase):
 
         provider = ApiProvider(make_mock_stacks_from_template(template))
 
-        result = [f for f in provider.get_all()]
+        result = list(provider.get_all())
         routes = result[0].routes
 
         self.assertEqual(routes, [])
@@ -875,7 +875,7 @@ class TestSamStageValues(TestCase):
 
         provider = ApiProvider(make_mock_stacks_from_template(template))
 
-        result = [f for f in provider.get_all()]
+        result = list(provider.get_all())
         routes = result[0].routes
 
         route1 = Route(path="/path2", methods=["GET"], function_name="NoApiEventFunction")
@@ -1853,10 +1853,10 @@ def make_swagger(routes, binary_media_types=None):
         integration = {
             "x-amazon-apigateway-integration": {
                 "type": "aws_proxy",
-                "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1"
-                ":123456789012:function:{}/invocations".format(api.function_name),  # NOQA
+                "uri": f"arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:123456789012:function:{api.function_name}/invocations",
             }
         }
+
         for method in api.methods:
             if method.lower() == "any":
                 method = "x-amazon-apigateway-any-method"

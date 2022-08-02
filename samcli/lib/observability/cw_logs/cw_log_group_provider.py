@@ -23,4 +23,4 @@ class LogGroupProvider:
         str
             Default Log Group name used by this function
         """
-        return "/aws/lambda/{}".format(function_name)
+        return f"/aws/lambda/{function_name}"

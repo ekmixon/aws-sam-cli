@@ -89,14 +89,14 @@ def do_cli(ctx, template, semantic_version):
     except InvalidS3UriError as ex:
         click.secho("Publish Failed", fg="red")
         raise UserException(
-            "Your SAM template contains invalid S3 URIs. Please make sure that you have uploaded application "
-            "artifacts to S3 by packaging the template. See more details in {}".format(SAM_PACKAGE_DOC),
+            f"Your SAM template contains invalid S3 URIs. Please make sure that you have uploaded application artifacts to S3 by packaging the template. See more details in {SAM_PACKAGE_DOC}",
             wrapped_from=ex.__class__.__name__,
         ) from ex
+
     except ServerlessRepoError as ex:
         click.secho("Publish Failed", fg="red")
         LOG.debug("Failed to publish application to serverlessrepo", exc_info=True)
-        error_msg = "{}\nPlease follow the instructions in {}".format(str(ex), SAM_PUBLISH_DOC)
+        error_msg = f"{str(ex)}\nPlease follow the instructions in {SAM_PUBLISH_DOC}"
         raise UserException(error_msg, wrapped_from=ex.__class__.__name__) from ex
 
     application_id = publish_output.get("application_id")
@@ -121,9 +121,9 @@ def _gen_success_message(publish_output):
     details = json.dumps(publish_output.get("details"), indent=2)
 
     if CREATE_APPLICATION in publish_output.get("actions"):
-        return "Created new application with the following metadata:\n{}".format(details)
+        return f"Created new application with the following metadata:\n{details}"
 
-    return 'The following metadata of application "{}" has been updated:\n{}'.format(application_id, details)
+    return f'The following metadata of application "{application_id}" has been updated:\n{details}'
 
 
 def _print_console_link(region, application_id):
@@ -142,5 +142,6 @@ def _print_console_link(region, application_id):
         region = boto3.Session().region_name
 
     console_link = SERVERLESSREPO_CONSOLE_URL.format(region, application_id.replace("/", "~"))
-    msg = "Click the link below to view your application in AWS console:\n{}".format(console_link)
+    msg = f"Click the link below to view your application in AWS console:\n{console_link}"
+
     click.secho(msg, fg="yellow")

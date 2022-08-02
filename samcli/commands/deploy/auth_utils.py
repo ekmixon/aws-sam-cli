@@ -131,10 +131,11 @@ def _auth_definition_body_and_uri(definition_body, definition_uri):
     # NOTE(sriram-mv): Authorization and Authentication is indicated by the `security` scheme.
     # https://swagger.io/docs/specification/authentication/
     for _, verb in swagger.get("paths", {}).items():
-        for _property in verb.values():
-            # If there are instrinsics in play, they may not be resolved yet.
-            if isinstance(_property, dict):
-                _auths.append(bool(_property.get("security", False)))
+        _auths.extend(
+            bool(_property.get("security", False))
+            for _property in verb.values()
+            if isinstance(_property, dict)
+        )
 
     _auths.append(bool(swagger.get("security", False)))
 

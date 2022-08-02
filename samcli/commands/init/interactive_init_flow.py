@@ -55,11 +55,7 @@ def do_interactive(
             click.echo("\t1 - Zip (artifact is a zip uploaded to S3)\t")
             click.echo("\t2 - Image (artifact is an image uploaded to an ECR image repository)")
             package_opt_choice = click.prompt("Package type", type=click.Choice(["1", "2"]), show_choices=False)
-            if package_opt_choice == "1":
-                package_type = ZIP
-            else:
-                package_type = IMAGE
-
+            package_type = ZIP if package_opt_choice == "1" else IMAGE
         _generate_from_app_template(
             location, package_type, runtime, base_image, dependency_manager, output_dir, name, app_template
         )
@@ -99,11 +95,9 @@ def _generate_from_app_template(
         location = templates.location_from_app_template(
             package_type, runtime, base_image, dependency_manager, app_template
         )
-        extra_context = {"project_name": name, "runtime": runtime}
     else:
         location, app_template = templates.prompt_for_location(package_type, runtime, base_image, dependency_manager)
-        extra_context = {"project_name": name, "runtime": runtime}
-
+    extra_context = {"project_name": name, "runtime": runtime}
     # executing event_bridge logic if call is for Schema dynamic template
     is_dynamic_schemas_template = templates.is_dynamic_schemas_template(
         package_type, app_template, runtime, base_image, dependency_manager
@@ -207,7 +201,7 @@ def _get_schema_template_details(schemas_api_caller):
         return get_schema_template_details(schemas_api_caller)
     except ClientError as e:
         raise SchemasApiException(
-            "Exception occurs while getting Schemas template parameter. %s" % e.response["Error"]["Message"]
+            f'Exception occurs while getting Schemas template parameter. {e.response["Error"]["Message"]}'
         ) from e
 
 
@@ -220,7 +214,8 @@ def _package_schemas_code(runtime, schemas_api_caller, schema_template_details, 
         download_location.close()
     except (ClientError, WaiterError) as e:
         raise SchemasApiException(
-            "Exception occurs while packaging Schemas code. %s" % e.response["Error"]["Message"]
+            f'Exception occurs while packaging Schemas code. {e.response["Error"]["Message"]}'
         ) from e
+
     finally:
         remove(download_location.name)

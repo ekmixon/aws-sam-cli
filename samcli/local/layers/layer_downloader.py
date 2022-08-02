@@ -72,11 +72,7 @@ class LayerDownloader:
         List(Path)
             List of Paths to where the layer was cached
         """
-        layer_dirs = []
-        for layer in layers:
-            layer_dirs.append(self.download(layer, force))
-
-        return layer_dirs
+        return [self.download(layer, force) for layer in layers]
 
     def download(self, layer: LayerVersion, force=False) -> LayerVersion:
         """
@@ -107,14 +103,15 @@ class LayerDownloader:
             LOG.info("%s is already cached. Skipping download", layer.arn)
             return layer
 
-        layer_zip_path = layer.codeuri + ".zip"
+        layer_zip_path = f"{layer.codeuri}.zip"
         layer_zip_uri = self._fetch_layer_uri(layer)
         unzip_from_uri(
             layer_zip_uri,
             layer_zip_path,
             unzip_output_dir=layer.codeuri,
-            progressbar_label="Downloading {}".format(layer.layer_arn),
+            progressbar_label=f"Downloading {layer.layer_arn}",
         )
+
 
         return layer
 
@@ -150,8 +147,11 @@ class LayerDownloader:
                     "Credentials provided are missing lambda:Getlayerversion policy that is needed to download the "
                     "layer or you do not have permission to download the layer"
                 ),
-                "ResourceNotFoundException": ResourceNotFound("{} was not found.".format(layer.arn)),
+                "ResourceNotFoundException": ResourceNotFound(
+                    f"{layer.arn} was not found."
+                ),
             }
+
 
             if error_code in error_exc:
                 raise error_exc[error_code]

@@ -75,7 +75,9 @@ def get_local_lambda_images_location(mapping, runtime):
     if dir_name.endswith("-lambda-image"):
         return os.path.join(_lambda_images_templates, runtime, dir_name)
 
-    return os.path.join(_lambda_images_templates, runtime, dir_name + "-lambda-image")
+    return os.path.join(
+        _lambda_images_templates, runtime, f"{dir_name}-lambda-image"
+    )
 
 
 RUNTIME_TO_DEPENDENCY_MANAGERS = {

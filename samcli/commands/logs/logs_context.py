@@ -186,10 +186,7 @@ class LogsCommandContext:
         -------
         Handle to the opened log file, if necessary. None otherwise
         """
-        if not output_file:
-            return None
-
-        return open(output_file, "wb")
+        return open(output_file, "wb") if output_file else None
 
     @staticmethod
     def _parse_time(time_str, property_name):
@@ -217,11 +214,12 @@ class LogsCommandContext:
         if not time_str:
             return None
 
-        parsed = parse_date(time_str)
-        if not parsed:
-            raise InvalidTimestampError("Unable to parse the time provided by '{}'".format(property_name))
-
-        return to_utc(parsed)
+        if parsed := parse_date(time_str):
+            return to_utc(parsed)
+        else:
+            raise InvalidTimestampError(
+                f"Unable to parse the time provided by '{property_name}'"
+            )
 
     @staticmethod
     def _get_resource_id_from_stack(cfn_client, stack_name, logical_id):

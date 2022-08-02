@@ -19,7 +19,7 @@ def read(*filenames, **kwargs):
 
 def read_requirements(req="base.txt"):
     content = read(os.path.join("requirements", req))
-    requirements = list()
+    requirements = []
     for line in content.split("\n"):
         line = line.strip()
         if line.startswith("#"):
@@ -33,14 +33,10 @@ def read_requirements(req="base.txt"):
 
 def read_version():
     content = read(os.path.join(os.path.dirname(__file__), "samcli", "__init__.py"))
-    return re.search(r"__version__ = \"([^']+)\"", content).group(1)
+    return re.search(r"__version__ = \"([^']+)\"", content)[1]
 
 
-cmd_name = "sam"
-if os.getenv("SAM_CLI_DEV"):
-    # We are installing in a dev environment
-    cmd_name = "samdev"
-
+cmd_name = "samdev" if os.getenv("SAM_CLI_DEV") else "sam"
 setup(
     name="aws-sam-cli",
     version=read_version(),
@@ -53,11 +49,13 @@ setup(
     license="Apache License 2.0",
     packages=find_packages(exclude=["tests.*", "tests"]),
     keywords="AWS SAM CLI",
-    # Support Python 3.6 or greater
     python_requires=">=3.6, <=4.0, !=4.0",
-    entry_points={"console_scripts": ["{}=samcli.cli.main:cli".format(cmd_name)]},
+    entry_points={"console_scripts": [f"{cmd_name}=samcli.cli.main:cli"]},
     install_requires=read_requirements("base.txt"),
-    extras_require={"pre-dev": read_requirements("pre-dev.txt"), "dev": read_requirements("dev.txt")},
+    extras_require={
+        "pre-dev": read_requirements("pre-dev.txt"),
+        "dev": read_requirements("dev.txt"),
+    },
     include_package_data=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",

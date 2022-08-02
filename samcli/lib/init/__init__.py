@@ -67,16 +67,27 @@ def generate_project(
 
     if runtime and package_type == ZIP:
         for mapping in list(itertools.chain(*(RUNTIME_DEP_TEMPLATE_MAPPING.values()))):
-            if runtime in mapping["runtimes"] or any([r.startswith(runtime) for r in mapping["runtimes"]]):
-                if not dependency_manager or dependency_manager == mapping["dependency_manager"]:
-                    template = mapping["init_location"]
-                    break
+            if (
+                runtime in mapping["runtimes"]
+                or any(r.startswith(runtime) for r in mapping["runtimes"])
+            ) and (
+                not dependency_manager
+                or dependency_manager == mapping["dependency_manager"]
+            ):
+                template = mapping["init_location"]
+                break
 
         if not template:
-            msg = "Lambda Runtime {} does not support dependency manager: {}".format(runtime, dependency_manager)
+            msg = f"Lambda Runtime {runtime} does not support dependency manager: {dependency_manager}"
+
             raise GenerateProjectFailedError(project=name, provider_error=msg)
 
-    params = {"template": location if location else template, "output_dir": output_dir, "no_input": no_input}
+    params = {
+        "template": location or template,
+        "output_dir": output_dir,
+        "no_input": no_input,
+    }
+
 
     if extra_context:
         params["extra_context"] = extra_context

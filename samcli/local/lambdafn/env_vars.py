@@ -187,21 +187,16 @@ class EnvironmentVariables:
 
         # List/dict/None values are replaced with a blank
         if isinstance(value, (dict, list, tuple)) or value is None:
-            result = self._BLANK_VALUE
+            return self._BLANK_VALUE
 
-        # str(True) will output "True". To maintain backwards compatibility we need to output "true" or "false"
         elif value is True:
-            result = "true"
+            return "true"
         elif value is False:  # pylint: disable=compare-to-zero
-            result = "false"
+            return "false"
 
-        # value is a scalar type like int, str which can be stringified
-        # do not stringify unicode in Py2, Py3 str supports unicode
         elif sys.version_info.major > 2:
-            result = str(value)
+            return str(value)
         elif not isinstance(value, unicode):  # noqa: F821 pylint: disable=undefined-variable
-            result = str(value)
+            return str(value)
         else:
-            result = value
-
-        return result
+            return value

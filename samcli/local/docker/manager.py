@@ -86,8 +86,9 @@ class ContainerManager:
             except DockerImagePullFailedException as ex:
                 if not is_image_local:
                     raise DockerImagePullFailedException(
-                        "Could not find {} image locally and failed to pull it from docker.".format(image_name)
+                        f"Could not find {image_name} image locally and failed to pull it from docker."
                     ) from ex
+
 
                 LOG.info("Failed to download a new %s image. Invoking with the already downloaded image.", image_name)
 
@@ -163,7 +164,7 @@ class ContainerManager:
                 raise DockerImagePullFailedException(str(ex)) from ex
 
             # io streams, especially StringIO, work only with unicode strings
-            stream_writer.write("\nFetching {} Docker container image...".format(image_name))
+            stream_writer.write(f"\nFetching {image_name} Docker container image...")
 
             # Each line contains information on progress of the pull. Each line is a JSON string
             for _ in result_itr:
@@ -197,9 +198,7 @@ class ContainerManager:
         : return bool: True, if the image name ends with rapid-$SAM_CLI_VERSION. False, otherwise
         """
 
-        if not re.search(r":rapid-\d+\.\d+.\d+$", image_name):
-            return False
-        return True
+        return bool(re.search(r":rapid-\d+\.\d+.\d+$", image_name))
 
 
 class DockerImagePullFailedException(Exception):

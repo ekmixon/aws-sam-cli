@@ -141,11 +141,7 @@ def do_cli(  # pylint: disable=R0914
 
     LOG.debug("local invoke command is called")
 
-    if event:
-        event_data = _get_event(event)
-    else:
-        event_data = "{}"
-
+    event_data = _get_event(event) if event else "{}"
     # Pass all inputs to setup necessary context to invoke function locally.
     # Handler exception raised by the processor for invalid args and print errors
     try:
@@ -178,8 +174,10 @@ def do_cli(  # pylint: disable=R0914
 
     except FunctionNotFound as ex:
         raise UserException(
-            "Function {} not found in template".format(function_identifier), wrapped_from=ex.__class__.__name__
+            f"Function {function_identifier} not found in template",
+            wrapped_from=ex.__class__.__name__,
         ) from ex
+
     except (
         InvalidSamDocumentException,
         OverridesNotWellDefinedError,

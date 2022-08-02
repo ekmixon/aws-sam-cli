@@ -143,7 +143,10 @@ class SamBaseProvider:
         str
             Representing the local imageuri
         """
-        return cast(Optional[str], resource_properties.get(code_property_key, dict()).get("ImageUri", None))
+        return cast(
+            Optional[str],
+            resource_properties.get(code_property_key, {}).get("ImageUri", None),
+        )
 
     @staticmethod
     def _extract_sam_function_imageuri(resource_properties: Dict, code_property_key: str) -> Optional[str]:
@@ -221,7 +224,7 @@ class SamBaseProvider:
         # NOTE: Ordering of following statements is important. It makes sure that any user-supplied values
         # override the defaults
         parameter_values = {}
-        parameter_values.update(IntrinsicsSymbolTable.DEFAULT_PSEUDO_PARAM_VALUES)
+        parameter_values |= IntrinsicsSymbolTable.DEFAULT_PSEUDO_PARAM_VALUES
         parameter_values.update(default_values)
         parameter_values.update(parameter_overrides or {})
 

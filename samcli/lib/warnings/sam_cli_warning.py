@@ -22,10 +22,11 @@ def _get_deployment_preferences_status(function):
     to it. If DeploymentPreference found then it returns its status if it is enabled or not.
     """
     deployment_preference = function.get("Properties", {}).get("DeploymentPreference", None)
-    if not deployment_preference:
-        # Missing deployment preferences treated as not enabled.
-        return False
-    return deployment_preference.get("Enabled", True)  # enabled by default
+    return (
+        deployment_preference.get("Enabled", True)
+        if deployment_preference
+        else False
+    )
 
 
 class TemplateWarningsChecker:
@@ -55,9 +56,7 @@ class TemplateWarningsChecker:
             return None
 
         should_warn, warning_message = warning.check(template_dict)
-        if should_warn:
-            return warning_message
-        return None
+        return warning_message if should_warn else None
 
 
 class CodeDeployWarning(TemplateWarning):
@@ -83,8 +82,10 @@ and how to mitigate it, please read these docs[1]
             1 for function in functions if _get_deployment_preferences_status(function)
         )
         deployment_features_disabled_count = sum(
-            1 for function in functions if not _get_deployment_preferences_status(function)
+            not _get_deployment_preferences_status(function)
+            for function in functions
         )
+
 
         send_warning = deployment_features_enabled_count > 0 and deployment_features_disabled_count > 0
         return (send_warning, self.WARNING_MESSAGE) if send_warning else (send_warning, "")
@@ -111,10 +112,15 @@ please read these docs[1]
             for (_, resource) in template_dict.get("Resources", {}).items()
             if resource.get("Type", "") == "AWS::Serverless::Function"
         ]
-        for function in functions:
-            if self._have_condition(function) and self._have_deployment_preferences(function):
-                return (True, self.WARNING_MESSAGE)
-        return (False, "")
+        return next(
+            (
+                (True, self.WARNING_MESSAGE)
+                for function in functions
+                if self._have_condition(function)
+                and self._have_deployment_preferences(function)
+            ),
+            (False, ""),
+        )
 
     @staticmethod
     def _have_condition(function: Dict) -> bool:

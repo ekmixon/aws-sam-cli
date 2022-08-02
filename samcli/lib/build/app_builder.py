@@ -118,8 +118,8 @@ class ApplicationBuilder:
         self._container_manager = container_manager
         self._parallel = parallel
         self._mode = mode
-        self._stream_writer = stream_writer if stream_writer else StreamWriter(osutils.stderr())
-        self._docker_client = docker_client if docker_client else docker.from_env()
+        self._stream_writer = stream_writer or StreamWriter(osutils.stderr())
+        self._docker_client = docker_client or docker.from_env()
 
         self._deprecated_runtimes = {"nodejs4.3", "nodejs6.10", "nodejs8.10", "dotnetcore2.0"}
         self._colored = Colored()
@@ -186,8 +186,9 @@ class ApplicationBuilder:
                     file_env_vars = json.load(fp)
             except Exception as ex:
                 raise IOError(
-                    "Could not read environment variables overrides from file {}: {}".format(env_vars_file, str(ex))
+                    f"Could not read environment variables overrides from file {env_vars_file}: {str(ex)}"
                 ) from ex
+
 
         for function in functions:
             container_env_vars = self._make_env_vars(function, file_env_vars, inline_env_vars)
@@ -369,9 +370,7 @@ class ApplicationBuilder:
         for log in build_logs:
             if log:
                 log_stream = log.get("stream")
-                error_stream = log.get("error")
-
-                if error_stream:
+                if error_stream := log.get("error"):
                     raise DockerBuildFailed(f"{function_name} failed to build: {error_stream}")
 
                 if log_stream:
@@ -656,8 +655,10 @@ class ApplicationBuilder:
             except docker.errors.APIError as ex:
                 if "executable file not found in $PATH" in str(ex):
                     raise UnsupportedBuilderLibraryVersionError(
-                        container.image, "{} executable not found in container".format(container.executable_name)
+                        container.image,
+                        f"{container.executable_name} executable not found in container",
                     ) from ex
+
 
             # Container's output provides status of whether the build succeeded or failed
             # stdout contains the result of JSON-RPC call
@@ -763,13 +764,13 @@ class ApplicationBuilder:
         # validate and raise OverridesNotWellDefinedError
         for env_var in list((file_env_vars or {}).values()) + list((inline_env_vars or {}).values()):
             if not isinstance(env_var, dict):
-                reason = "Environment variables {} in incorrect format".format(env_var)
+                reason = f"Environment variables {env_var} in incorrect format"
                 LOG.debug(reason)
                 raise OverridesNotWellDefinedError(reason)
 
         if file_env_vars:
             parameter_result = file_env_vars.get("Parameters", {})
-            result.update(parameter_result)
+            result |= parameter_result
 
         if inline_env_vars:
             inline_parameter_result = inline_env_vars.get("Parameters", {})

@@ -113,7 +113,7 @@ class TestBuildCommand_PythonFunctions(BuildIntegBase):
         overrides = {"Runtime": runtime, "CodeUri": codeuri, "Handler": "main.handler"}
         cmdlist = self.get_command_list(use_container=use_container, parameter_overrides=overrides)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         run_command(cmdlist, cwd=self.working_dir)
 
         self._verify_built_artifact(
@@ -174,7 +174,7 @@ class TestBuildCommand_PythonFunctions(BuildIntegBase):
         self.assertEqual(actual_files, expected_files)
 
     def _get_python_version(self):
-        return "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+        return f"python{sys.version_info.major}.{sys.version_info.minor}"
 
 
 @skipIf(
@@ -187,7 +187,7 @@ class TestBuildCommand_ErrorCases(BuildIntegBase):
         overrides = {"Runtime": "unsupportedpython", "CodeUri": "Python"}
         cmdlist = self.get_command_list(parameter_overrides=overrides)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         LOG.info(cmdlist)
         process_execute = run_command(cmdlist, cwd=self.working_dir)
         self.assertEqual(1, process_execute.process.returncode)
@@ -223,7 +223,7 @@ class TestBuildCommand_NodeFunctions(BuildIntegBase):
         overrides = {"Runtime": runtime, "CodeUri": "Node", "Handler": "ignored"}
         cmdlist = self.get_command_list(use_container=use_container, parameter_overrides=overrides)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         run_command(cmdlist, cwd=self.working_dir)
 
         self._verify_built_artifact(
@@ -427,7 +427,7 @@ class TestBuildCommand_Java(BuildIntegBase):
         if code_path == self.USING_GRADLEW_PATH and use_container and IS_WINDOWS:
             osutils.convert_to_unix_line_ending(os.path.join(self.test_data_path, self.USING_GRADLEW_PATH, "gradlew"))
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         run_command(cmdlist, cwd=self.working_dir)
 
         self._verify_built_artifact(
@@ -456,8 +456,8 @@ class TestBuildCommand_Java(BuildIntegBase):
 
         # If we are testing in the container, invoke the function as well. Otherwise we cannot guarantee docker is on appveyor
         if use_container:
-            expected = "Hello World"
             if not SKIP_DOCKER_TESTS:
+                expected = "Hello World"
                 self._verify_invoke_built_function(
                     self.built_template,
                     self.FUNCTION_LOGICAL_ID,
@@ -524,8 +524,8 @@ class TestBuildCommand_Dotnet_cli_package(BuildIntegBase):
         }
         cmdlist = self.get_command_list(use_container=False, parameter_overrides=overrides)
 
-        LOG.info("Running Command: {}".format(cmdlist))
-        LOG.info("Running with SAM_BUILD_MODE={}".format(mode))
+        LOG.info(f"Running Command: {cmdlist}")
+        LOG.info(f"Running with SAM_BUILD_MODE={mode}")
 
         newenv = os.environ.copy()
         if mode:
@@ -557,8 +557,8 @@ class TestBuildCommand_Dotnet_cli_package(BuildIntegBase):
             ),
         )
 
-        expected = "{'message': 'Hello World'}"
         if not SKIP_DOCKER_TESTS:
+            expected = "{'message': 'Hello World'}"
             self._verify_invoke_built_function(
                 self.built_template, self.FUNCTION_LOGICAL_ID, self._make_parameter_override_arg(overrides), expected
             )
@@ -576,7 +576,7 @@ class TestBuildCommand_Dotnet_cli_package(BuildIntegBase):
         }
         cmdlist = self.get_command_list(use_container=use_container, parameter_overrides=overrides)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         process_execute = run_command(cmdlist, cwd=self.working_dir)
 
         # Must error out, because container builds are not supported
@@ -617,8 +617,8 @@ class TestBuildCommand_Go_Modules(BuildIntegBase):
 
         # Need to pass GOPATH ENV variable to match the test directory when running build
 
-        LOG.info("Running Command: {}".format(cmdlist))
-        LOG.info("Running with SAM_BUILD_MODE={}".format(mode))
+        LOG.info(f"Running Command: {cmdlist}")
+        LOG.info(f"Running with SAM_BUILD_MODE={mode}")
 
         newenv = os.environ.copy()
         if mode:
@@ -643,8 +643,8 @@ class TestBuildCommand_Go_Modules(BuildIntegBase):
             ),
         )
 
-        expected = "{'message': 'Hello World'}"
         if not SKIP_DOCKER_TESTS:
+            expected = "{'message': 'Hello World'}"
             self._verify_invoke_built_function(
                 self.built_template, self.FUNCTION_LOGICAL_ID, self._make_parameter_override_arg(overrides), expected
             )
@@ -659,7 +659,7 @@ class TestBuildCommand_Go_Modules(BuildIntegBase):
         overrides = {"Runtime": runtime, "CodeUri": code_uri, "Handler": "hello-world"}
         cmdlist = self.get_command_list(use_container=use_container, parameter_overrides=overrides)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         process_execute = run_command(cmdlist, cwd=self.working_dir)
 
         # Must error out, because container builds are not supported
@@ -726,7 +726,7 @@ class TestBuildCommand_SingleFunctionBuilds(BuildIntegBase):
             use_container=use_container, parameter_overrides=overrides, function_identifier=function_identifier
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         run_command(cmdlist, cwd=self.working_dir)
 
         self._verify_built_artifact(self.default_build_dir, function_identifier, self.EXPECTED_FILES_PROJECT_MANIFEST)
@@ -759,7 +759,7 @@ class TestBuildCommand_SingleFunctionBuilds(BuildIntegBase):
         self.assertEqual(actual_files, expected_files)
 
     def _get_python_version(self):
-        return "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+        return f"python{sys.version_info.major}.{sys.version_info.minor}"
 
 
 @skipIf(
@@ -782,7 +782,7 @@ class TestBuildCommand_LayerBuilds(BuildIntegBase):
             use_container=use_container, parameter_overrides=overrides, function_identifier=layer_identifier
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
 
         run_command(cmdlist, cwd=self.working_dir)
 
@@ -807,7 +807,7 @@ class TestBuildCommand_LayerBuilds(BuildIntegBase):
             use_container=use_container, parameter_overrides=overrides, function_identifier=layer_identifier
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
 
         run_command(cmdlist, cwd=self.working_dir)
 
@@ -830,7 +830,7 @@ class TestBuildCommand_LayerBuilds(BuildIntegBase):
             use_container=use_container, parameter_overrides=overrides, function_identifier=layer_identifier
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
 
         run_command(cmdlist, cwd=self.working_dir)
 
@@ -851,7 +851,7 @@ class TestBuildCommand_LayerBuilds(BuildIntegBase):
         }
         cmdlist = self.get_command_list(use_container=use_container, parameter_overrides=overrides)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
 
         run_command(cmdlist, cwd=self.working_dir)
 
@@ -888,7 +888,7 @@ class TestBuildCommand_LayerBuilds(BuildIntegBase):
             use_container=use_container, parameter_overrides=overrides, function_identifier="FunctionOne"
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
 
         run_command(cmdlist, cwd=self.working_dir)
 
@@ -929,7 +929,7 @@ class TestBuildCommand_LayerBuilds(BuildIntegBase):
         self.assertEqual(actual_files, expected_files)
 
     def _get_python_version(self):
-        return "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+        return f"python{sys.version_info.major}.{sys.version_info.minor}"
 
 
 @parameterized_class(
@@ -969,7 +969,7 @@ class TestBuildCommand_ProvidedFunctions(BuildIntegBase):
             use_container=use_container, parameter_overrides=overrides, manifest_path=manifest_path
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         # Built using Makefile for a python project.
         run_command(cmdlist, cwd=self.working_dir)
 
@@ -982,10 +982,10 @@ class TestBuildCommand_ProvidedFunctions(BuildIntegBase):
                 self.default_build_dir, self.FUNCTION_LOGICAL_ID, self.EXPECTED_FILES_PROJECT_MANIFEST
             )
 
-        expected = "2.23.0"
         # Building was done with a makefile, but invoke should be checked with corresponding python image.
         overrides["Runtime"] = self._get_python_version()
         if not SKIP_DOCKER_TESTS:
+            expected = "2.23.0"
             self._verify_invoke_built_function(
                 self.built_template, self.FUNCTION_LOGICAL_ID, self._make_parameter_override_arg(overrides), expected
             )
@@ -1035,7 +1035,7 @@ class TestBuildCommand_ProvidedFunctions(BuildIntegBase):
         self.assertEqual(actual_files, expected_files)
 
     def _get_python_version(self):
-        return "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+        return f"python{sys.version_info.major}.{sys.version_info.minor}"
 
 
 @skipIf(
@@ -1068,7 +1068,7 @@ class TestBuildWithBuildMethod(BuildIntegBase):
             use_container=use_container, parameter_overrides=overrides, manifest_path=manifest_path
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         # Built using Makefile for a python project.
         run_command(cmdlist, cwd=self.working_dir)
 
@@ -1076,9 +1076,9 @@ class TestBuildWithBuildMethod(BuildIntegBase):
             self.default_build_dir, self.FUNCTION_LOGICAL_ID, self.EXPECTED_FILES_PROJECT_MANIFEST
         )
 
-        expected = "2.23.0"
         # Building was done with a makefile, invoke is checked with the same runtime image.
         if not SKIP_DOCKER_TESTS:
+            expected = "2.23.0"
             self._verify_invoke_built_function(
                 self.built_template, self.FUNCTION_LOGICAL_ID, self._make_parameter_override_arg(overrides), expected
             )
@@ -1105,7 +1105,7 @@ class TestBuildWithBuildMethod(BuildIntegBase):
             use_container=use_container, parameter_overrides=overrides, manifest_path=manifest_path
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         # Built using `native` python-pip builder for a python project.
         run_command(cmdlist, cwd=self.working_dir)
 
@@ -1113,9 +1113,9 @@ class TestBuildWithBuildMethod(BuildIntegBase):
             self.default_build_dir, self.FUNCTION_LOGICAL_ID, self.EXPECTED_FILES_PROJECT_MANIFEST
         )
 
-        expected = "2.23.0"
         # Building was done with a `python-pip` builder, invoke is checked with the same runtime image.
         if not SKIP_DOCKER_TESTS:
+            expected = "2.23.0"
             self._verify_invoke_built_function(
                 self.built_template, self.FUNCTION_LOGICAL_ID, self._make_parameter_override_arg(overrides), expected
             )
@@ -1140,7 +1140,7 @@ class TestBuildWithBuildMethod(BuildIntegBase):
             use_container=use_container, parameter_overrides=overrides, manifest_path=manifest_path
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         # This will error out.
         command = run_command(cmdlist, cwd=self.working_dir)
         self.assertEqual(command.process.returncode, 1)
@@ -1165,7 +1165,7 @@ class TestBuildWithBuildMethod(BuildIntegBase):
         self.assertEqual(actual_files, expected_files)
 
     def _get_python_version(self):
-        return "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
+        return f"python{sys.version_info.major}.{sys.version_info.minor}"
 
 
 @skipIf(
@@ -1212,13 +1212,13 @@ class TestBuildWithDedupBuilds(DedupBuildIntegBase):
         }
         cmdlist = self.get_command_list(use_container=use_container, parameter_overrides=overrides)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         # Built using `native` python-pip builder for a python project.
         command_result = run_command(cmdlist, cwd=self.working_dir)
 
-        expected_messages = ["World", "Mars"]
-
         if not SKIP_DOCKER_TESTS:
+            expected_messages = ["World", "Mars"]
+
             self._verify_build_and_invoke_functions(
                 expected_messages, command_result, self._make_parameter_override_arg(overrides)
             )
@@ -1249,7 +1249,7 @@ class TestBuildWithDedupImageBuilds(DedupBuildIntegBase):
         }
         cmdlist = self.get_command_list(use_container=use_container, parameter_overrides=overrides)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         run_command(cmdlist, cwd=self.working_dir)
 
         if not SKIP_DOCKER_TESTS:
@@ -1275,13 +1275,13 @@ class TestBuildWithDedupBuildsMakefile(DedupBuildIntegBase):
         """
         cmdlist = self.get_command_list()
 
-        LOG.info("Running Command: {}".format(cmdlist))
-        # Built using `native` python-pip builder for a python project.
-        command_result = run_command(cmdlist, cwd=self.working_dir)
-
-        expected_messages = ["World", "Mars"]
-
+        LOG.info(f"Running Command: {cmdlist}")
         if not SKIP_DOCKER_TESTS:
+            # Built using `native` python-pip builder for a python project.
+            command_result = run_command(cmdlist, cwd=self.working_dir)
+
+            expected_messages = ["World", "Mars"]
+
             self._verify_build_and_invoke_functions(expected_messages, command_result, "")
 
     def _verify_process_code_and_output(self, command_result):
@@ -1339,9 +1339,9 @@ class TestBuildWithCacheBuilds(CachedBuildIntegBase):
         # Built using `native` python-pip builder for a python project.
         command_result = run_command(cmdlist, cwd=self.working_dir)
 
-        expected_messages = ["World", "Mars"]
-
         if not SKIP_DOCKER_TESTS:
+            expected_messages = ["World", "Mars"]
+
             self._verify_build_and_invoke_functions(
                 expected_messages, command_result, self._make_parameter_override_arg(overrides)
             )
@@ -1425,9 +1425,9 @@ class TestParallelBuilds(DedupBuildIntegBase):
         # Built using `native` python-pip builder for a python project.
         command_result = run_command(cmdlist, cwd=self.working_dir)
 
-        expected_messages = ["World", "Mars"]
-
         if not SKIP_DOCKER_TESTS:
+            expected_messages = ["World", "Mars"]
+
             self._verify_build_and_invoke_functions(
                 expected_messages, command_result, self._make_parameter_override_arg(overrides)
             )
@@ -1453,7 +1453,7 @@ class TestBuildWithInlineCode(BuildIntegBase):
 
         cmdlist = self.get_command_list(use_container=use_container)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         run_command(cmdlist, cwd=self.working_dir)
 
         self._verify_built_artifact(self.default_build_dir)
@@ -1503,7 +1503,7 @@ class TestBuildWithJsonContainerEnvVars(BuildIntegBase):
             use_container=use_container, container_env_var_file=self.get_env_file(env_vars_file)
         )
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         run_command(cmdlist, cwd=self.working_dir)
 
         self._verify_built_env_var(self.default_build_dir)
@@ -1552,7 +1552,7 @@ class TestBuildWithInlineContainerEnvVars(BuildIntegBase):
 
         cmdlist = self.get_command_list(use_container=use_container, container_env_var=inline_env_var)
 
-        LOG.info("Running Command: {}".format(cmdlist))
+        LOG.info(f"Running Command: {cmdlist}")
         run_command(cmdlist, cwd=self.working_dir)
 
         self._verify_built_env_var(self.default_build_dir)
@@ -1626,9 +1626,9 @@ class TestBuildWithNestedStacks(NestedBuildIntegBase):
         # make sure functions are deduplicated properly, in stderr they will show up in the same line.
         self.assertRegex(command_result.stderr.decode("utf-8"), r"Building .+'Function2',.+LocalNestedStack/Function2")
 
-        function_full_paths = ["Function", "Function2", "LocalNestedStack/Function1", "LocalNestedStack/Function2"]
-        stack_paths = ["", "LocalNestedStack"]
         if not SKIP_DOCKER_TESTS:
+            function_full_paths = ["Function", "Function2", "LocalNestedStack/Function1", "LocalNestedStack/Function2"]
+            stack_paths = ["", "LocalNestedStack"]
             self._verify_build(
                 function_full_paths,
                 stack_paths,
@@ -1695,17 +1695,17 @@ class TestBuildWithNestedStacks3Level(NestedBuildIntegBase):
 
         command_result = run_command(cmdlist, cwd=self.working_dir)
 
-        function_full_paths = [
-            "FunctionA",
-            "ChildStackX/FunctionB",
-            "ChildStackX/ChildStackY/FunctionA",
-        ]
-        stack_paths = [
-            "",
-            "ChildStackX",
-            "ChildStackX/ChildStackY",
-        ]
         if not SKIP_DOCKER_TESTS:
+            function_full_paths = [
+                "FunctionA",
+                "ChildStackX/FunctionB",
+                "ChildStackX/ChildStackY/FunctionA",
+            ]
+            stack_paths = [
+                "",
+                "ChildStackX",
+                "ChildStackX/ChildStackY",
+            ]
             self._verify_build(
                 function_full_paths,
                 stack_paths,
@@ -1755,21 +1755,21 @@ class TestBuildWithNestedStacks3LevelWithSymlink(NestedBuildIntegBase):
 
         command_result = run_command(cmdlist, cwd=self.working_dir)
 
-        function_full_paths = [
-            "FunctionA",
-            "ChildStackX/FunctionB",
-            "ChildStackX/ChildStackY/FunctionA",
-            "ChildStackXViaSymlink/FunctionB",
-            "ChildStackXViaSymlink/ChildStackY/FunctionA",
-        ]
-        stack_paths = [
-            "",
-            "ChildStackX",
-            "ChildStackX/ChildStackY",
-            "ChildStackXViaSymlink",
-            "ChildStackXViaSymlink/ChildStackY",
-        ]
         if not SKIP_DOCKER_TESTS:
+            function_full_paths = [
+                "FunctionA",
+                "ChildStackX/FunctionB",
+                "ChildStackX/ChildStackY/FunctionA",
+                "ChildStackXViaSymlink/FunctionB",
+                "ChildStackXViaSymlink/ChildStackY/FunctionA",
+            ]
+            stack_paths = [
+                "",
+                "ChildStackX",
+                "ChildStackX/ChildStackY",
+                "ChildStackXViaSymlink",
+                "ChildStackXViaSymlink/ChildStackY",
+            ]
             self._verify_build(
                 function_full_paths,
                 stack_paths,
@@ -1853,8 +1853,8 @@ class TestBuildWithNestedStacksImage(NestedBuildIntegBase):
 
         command_result = run_command(cmdlist, cwd=self.working_dir)
 
-        stack_paths = ["", "LocalNestedStack"]
         if not SKIP_DOCKER_TESTS:
+            stack_paths = ["", "LocalNestedStack"]
             self._verify_build(
                 [],  # there is no function artifact dirs to check
                 stack_paths,

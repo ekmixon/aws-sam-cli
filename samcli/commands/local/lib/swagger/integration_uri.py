@@ -124,15 +124,13 @@ class LambdaUri:
             LOG.debug("This Integration URI format is not supported: %s", uri_data)
             return None
 
-        # uri_data is a string.
-        # Extract the first Function ARN
-        matches = re.search(LambdaUri._REGEX_GET_FUNCTION_ARN, uri_data)
-        if matches:
-            return matches.group(0)
+        if matches := re.search(LambdaUri._REGEX_GET_FUNCTION_ARN, uri_data):
+            return matches[0]
 
-        matches = re.search(LambdaUri._REGEX_GET_FUNCTION_ARN_GENERIC, uri_data)
-        if matches:
-            return matches.group(1)  # First match is the whole string
+        if matches := re.search(
+            LambdaUri._REGEX_GET_FUNCTION_ARN_GENERIC, uri_data
+        ):
+            return matches[1]
 
         LOG.debug("Ignoring Integration URI because it is not a Lambda Function integration: %s", uri_data)
         return None

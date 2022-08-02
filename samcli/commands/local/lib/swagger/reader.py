@@ -102,12 +102,7 @@ class SwaggerReader:
             Swagger document. None, if we cannot retrieve the document
         """
 
-        swagger = None
-
-        # First check if there is inline swagger
-        if self.definition_body:
-            swagger = self._read_from_definition_body()
-
+        swagger = self._read_from_definition_body() if self.definition_body else None
         if not swagger and self.definition_uri:
             # If not, then try to download it from the given URI
             swagger = self._download_swagger(self.definition_uri)
@@ -126,10 +121,7 @@ class SwaggerReader:
             Swagger document, if we were able to parse. None, otherwise
         """
 
-        # Let's try to parse it as AWS::Include Transform first. If not, then fall back to assuming the Swagger document
-        # was inclined directly into the body
-        location = parse_aws_include_transform(self.definition_body)
-        if location:
+        if location := parse_aws_include_transform(self.definition_body):
             LOG.debug("Trying to download Swagger from %s", location)
             return self._download_swagger(location)
 

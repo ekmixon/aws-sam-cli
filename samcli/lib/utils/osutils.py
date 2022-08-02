@@ -138,11 +138,7 @@ def copytree(source, destination, ignore=None):
             LOG.debug("Unable to copy file access times from %s to %s", source, destination, exc_info=ex)
 
     names = os.listdir(source)
-    if ignore is not None:
-        ignored_names = ignore(source, names)
-    else:
-        ignored_names = set()
-
+    ignored_names = ignore(source, names) if ignore is not None else set()
     for name in names:
         # Skip ignored names
         if name in ignored_names:

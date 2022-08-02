@@ -146,7 +146,7 @@ class LayerVersion:
         if metadata is None:
             metadata = {}
         if not isinstance(arn, str):
-            raise UnsupportedIntrinsic("{} is an Unsupported Intrinsic".format(arn))
+            raise UnsupportedIntrinsic(f"{arn} is an Unsupported Intrinsic")
 
         self._stack_path = stack_path
         self._arn = arn
@@ -181,7 +181,7 @@ class LayerVersion:
             _, layer_version = arn.rsplit(":", 1)
             return int(layer_version)
         except ValueError as ex:
-            raise InvalidLayerVersionArn(arn + " is an Invalid Layer Arn.") from ex
+            raise InvalidLayerVersionArn(f"{arn} is an Invalid Layer Arn.") from ex
 
     @staticmethod
     def _compute_layer_name(is_defined_within_template: bool, arn: str) -> str:
@@ -212,10 +212,14 @@ class LayerVersion:
         try:
             _, layer_name, layer_version = arn.rsplit(":", 2)
         except ValueError as ex:
-            raise InvalidLayerVersionArn(arn + " is an Invalid Layer Arn.") from ex
+            raise InvalidLayerVersionArn(f"{arn} is an Invalid Layer Arn.") from ex
 
         return LayerVersion.LAYER_NAME_DELIMETER.join(
-            [layer_name, layer_version, hashlib.sha256(arn.encode("utf-8")).hexdigest()[0:10]]
+            [
+                layer_name,
+                layer_version,
+                hashlib.sha256(arn.encode("utf-8")).hexdigest()[:10],
+            ]
         )
 
     @property
@@ -426,8 +430,7 @@ class Stack(NamedTuple):
         and parameter values have been substituted.
         """
         processed_template_dict: Dict = SamBaseProvider.get_template(self.template_dict, self.parameters)
-        resources: Dict = processed_template_dict.get("Resources", {})
-        return resources
+        return processed_template_dict.get("Resources", {})
 
     def get_output_template_path(self, build_root: str) -> str:
         """
